@@ -1,19 +1,30 @@
-print("Amazon Desk Setup Automation")
-print("System is starting...")
 import csv
 
-print("Amazon Desk Setup Automation Started!")
+print("========================================")
+print("   AMAZON DESK SETUP AUTOMATION")
+print("========================================")
 
+# Open the product database
 with open("products.csv", "r", encoding="utf-8") as file:
-    products = csv.DictReader(file)
+    products = list(csv.DictReader(file))
 
-    for product in products:
-        print("--------------------------------")
-        print("Product ID:", product["product_id"])
-        print("Product:", product["product_name"])
-        print("Category:", product["category"])
-        print("Amazon Link:", product["amazon_link"])
-        print("Used:", product["used"])
+# Find the first unused product
+unused_product = None
 
-print("--------------------------------")
-print("Products loaded successfully!")
+for product in products:
+    if product["used"].strip().lower() == "no":
+        unused_product = product
+        break
+
+# Display the selected product
+if unused_product:
+    print("\nNEXT PRODUCT")
+    print("----------------------------------------")
+    print("Product ID:", unused_product["product_id"])
+    print("Product:", unused_product["product_name"])
+    print("Category:", unused_product["category"])
+    print("Amazon Link:", unused_product["amazon_link"])
+    print("Used:", unused_product["used"])
+    print("----------------------------------------")
+else:
+    print("\nAll products have been used.")
