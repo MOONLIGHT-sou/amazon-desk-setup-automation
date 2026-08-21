@@ -22,7 +22,7 @@ jobs:
       - name: Run automation
         run: python main.py
 
-      - name: Save updated products.csv
+      - name: Save updated git add products.csv content/
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
