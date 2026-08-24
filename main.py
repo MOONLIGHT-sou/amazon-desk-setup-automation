@@ -1,106 +1,304 @@
+# main.py
+
 import csv
 import os
+import sys
 
-print("========================================")
-print("   AMAZON DESK SETUP AUTOMATION")
-print("========================================")
+PRODUCTS_FILE = "products.csv"
+CONTENT_DIR = "content"
 
-# Load the product database
-with open("products.csv", "r", encoding="utf-8") as file:
+def find_first_unused_product():
+"""Find the first product whose used status is No."""
+
+```
+with open(PRODUCTS_FILE, "r", newline="", encoding="utf-8") as file:
     reader = csv.DictReader(file)
     products = list(reader)
 
-# Find the first unused product
-unused_product = None
-
 for product in products:
     if product["used"].strip().lower() == "no":
-        unused_product = product
+        return products, product
+
+return products, None
+```
+
+def generate_content(product):
+"""Generate the content package for the selected product."""
+
+```
+product_id = product["product_id"]
+product_name = product["product_name"]
+category = product["category"]
+amazon_link = product["amazon_link"]
+
+os.makedirs(CONTENT_DIR, exist_ok=True)
+
+content_file = os.path.join(
+    CONTENT_DIR,
+    f"{product_id}.txt"
+)
+
+content = f"""PRODUCT CONTENT PACKAGE
+```
+
+Product ID: {product_id}
+Product Name: {product_name}
+Category: {category}
+Amazon Link: {amazon_link}
+
+==============================
+MEDIUM
+======
+
+Title:
+5 Amazon Desk Setup Products That Instantly Upgrade Your Workspace
+
+Subtitle:
+A simple desk upgrade can make your workspace feel cleaner, more comfortable, and more inspiring.
+
+Product:
+{product_name}
+
+Why It Matters:
+A good desk setup is not only about appearance. The right products can make your workspace feel more organized, comfortable, and enjoyable to use.
+
+{product_name} can be a useful addition to a modern desk setup, especially for people who want to improve their workspace without completely redesigning it.
+
+Amazon:
+{amazon_link}
+
+==============================
+PINTEREST MAIN PIN
+==================
+
+Title:
+Amazon Desk Setup Upgrade
+
+Description:
+Upgrade your workspace with simple Amazon desk setup products designed to make your desk cleaner, more comfortable, and more aesthetic.
+
+Featured Product:
+{product_name}
+
+Amazon:
+{amazon_link}
+
+==============================
+PINTEREST PRODUCT PIN
+=====================
+
+Title:
+{product_name} — Desk Setup Upgrade
+
+Description:
+Give your desk a simple upgrade with {product_name}. A practical addition for anyone building a cleaner, more productive, and aesthetic workspace.
+
+Category:
+{category}
+
+Amazon:
+{amazon_link}
+
+==============================
+END OF CONTENT PACKAGE
+======================
+
+"""
+
+```
+with open(content_file, "w", encoding="utf-8") as file:
+    file.write(content)
+
+return content_file
+```
+
+def verify_content_file(content_file, product):
+"""
+Verify that the generated content file exists,
+is not empty, and contains the expected product data.
+"""
+
+```
+product_id = product["product_id"]
+product_name = product["product_name"]
+
+print("")
+print("VERIFYING GENERATED CONTENT...")
+print(f"Expected file: {content_file}")
+
+# Check 1: File exists
+if not os.path.isfile(content_file):
+    raise RuntimeError(
+        f"CONTENT VERIFICATION FAILED: "
+        f"{content_file} does not exist."
+    )
+
+print("✓ File exists")
+
+# Check 2: File is not empty
+file_size = os.path.getsize(content_file)
+
+if file_size == 0:
+    raise RuntimeError(
+        f"CONTENT VERIFICATION FAILED: "
+        f"{content_file} is empty."
+    )
+
+print(f"✓ File is not empty ({file_size} bytes)")
+
+# Check 3: Read the generated file
+with open(content_file, "r", encoding="utf-8") as file:
+    generated_content = file.read()
+
+# Check 4: Product ID exists
+if product_id not in generated_content:
+    raise RuntimeError(
+        f"CONTENT VERIFICATION FAILED: "
+        f"Product ID {product_id} was not found in generated content."
+    )
+
+print(f"✓ Product ID found: {product_id}")
+
+# Check 5: Product name exists
+if product_name not in generated_content:
+    raise RuntimeError(
+        f"CONTENT VERIFICATION FAILED: "
+        f"Product name '{product_name}' was not found in generated content."
+    )
+
+print(f"✓ Product name found: {product_name}")
+
+print("✓ CONTENT VERIFICATION PASSED")
+
+return True
+```
+
+def mark_product_as_used(products, selected_product):
+"""Mark the successfully processed product as used."""
+
+```
+product_id = selected_product["product_id"]
+
+for product in products:
+    if product["product_id"] == product_id:
+        product["used"] = "Yes"
         break
+```
 
-# If an unused product exists
-if unused_product:
+def save_products(products):
+"""Save the updated products.csv."""
 
-    product_id = unused_product["product_id"]
-    product_name = unused_product["product_name"]
-    category = unused_product["category"]
-    amazon_link = unused_product["amazon_link"]
+```
+fieldnames = [
+    "product_id",
+    "product_name",
+    "category",
+    "amazon_link",
+    "used"
+]
 
-    print("\nNEXT PRODUCT")
-    print("----------------------------------------")
-    print("Product ID:", product_id)
-    print("Product:", product_name)
-    print("Category:", category)
-    print("Amazon Link:", amazon_link)
-    print("----------------------------------------")
+with open(
+    PRODUCTS_FILE,
+    "w",
+    newline="",
+    encoding="utf-8"
+) as file:
 
-    # Create content folder if it doesn't exist
-    os.makedirs("content", exist_ok=True)
+    writer = csv.DictWriter(
+        file,
+        fieldnames=fieldnames
+    )
 
-    # Create content file
-    content_file = f"content/{product_id}.txt"
+    writer.writeheader()
+    writer.writerows(products)
+```
 
-    with open(content_file, "w", encoding="utf-8") as file:
-        file.write("AMAZON DESK SETUP CONTENT PACKAGE\n")
-        file.write("=================================\n\n")
+def main():
+print("========================================")
+print("Amazon Desk Setup Automation")
+print("Stage 2.3B — Safe Content Generation")
+print("========================================")
 
-        file.write(f"Product ID: {product_id}\n")
-        file.write(f"Product Name: {product_name}\n")
-        file.write(f"Category: {category}\n")
-        file.write(f"Amazon Link: {amazon_link}\n\n")
+```
+# ----------------------------------------
+# STEP 1 — Find first unused product
+# ----------------------------------------
 
-        file.write("MEDIUM BLOG\n")
-        file.write("-----------\n")
-        file.write(f"Title: {product_name} – A Simple Upgrade for Your Desk\n")
-        file.write("Subtitle: A practical desk upgrade worth considering.\n\n")
+products, selected_product = find_first_unused_product()
 
-        file.write("PINTEREST MAIN PIN\n")
-        file.write("-----------------\n")
-        file.write(f"Title: {product_name} Desk Setup Upgrade\n")
-        file.write(
-            f"Description: Upgrade your desk setup with {product_name}. "
-            "A simple idea for creating a cleaner, more productive workspace.\n\n"
-        )
+if selected_product is None:
+    print("")
+    print("No unused products found.")
+    sys.exit(0)
 
-        file.write("PINTEREST PRODUCT PIN\n")
-        file.write("---------------------\n")
-        file.write(f"Title: {product_name} for a Better Desk Setup\n")
-        file.write(
-            f"Description: Looking for a simple desk upgrade? "
-            f"Check out this {product_name}.\n"
-        )
+product_id = selected_product["product_id"]
+product_name = selected_product["product_name"]
 
-    print("\nCONTENT PACKAGE CREATED")
-    print("----------------------------------------")
-    print("File:", content_file)
-    print("----------------------------------------")
+print("")
+print("SELECTED PRODUCT")
+print(f"Product ID: {product_id}")
+print(f"Product Name: {product_name}")
 
-    # Mark the selected product as used
-    for product in products:
-        if product["product_id"] == product_id:
-            product["used"] = "Yes"
-            break
+# ----------------------------------------
+# STEP 2 — Generate content
+# ----------------------------------------
 
-    # Save updated product database
-    with open("products.csv", "w", newline="", encoding="utf-8") as file:
+print("")
+print("GENERATING CONTENT...")
 
-        fieldnames = [
-            "product_id",
-            "product_name",
-            "category",
-            "amazon_link",
-            "used"
-        ]
+content_file = generate_content(selected_product)
 
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
+print(f"Content generated: {content_file}")
 
-        writer.writeheader()
-        writer.writerows(products)
+# ----------------------------------------
+# STEP 3 — VERIFY CONTENT
+# ----------------------------------------
+# IMPORTANT:
+# The product is NOT marked as used before
+# this verification succeeds.
 
-    print("\nSTATUS UPDATED")
-    print("----------------------------------------")
-    print(product_name, "is now marked as USED.")
-    print("----------------------------------------")
+verify_content_file(
+    content_file,
+    selected_product
+)
 
-else:
-    print("\nAll products have been used.")
+# ----------------------------------------
+# STEP 4 — ONLY NOW mark product as used
+# ----------------------------------------
+
+print("")
+print("CONTENT IS VERIFIED.")
+print("Product is now safe to mark as used.")
+
+mark_product_as_used(
+    products,
+    selected_product
+)
+
+# ----------------------------------------
+# STEP 5 — Save products.csv
+# ----------------------------------------
+
+save_products(products)
+
+print("")
+print("PRODUCT STATUS UPDATED")
+print(f"{product_id}: No → Yes")
+
+# ----------------------------------------
+# FINAL SUCCESS
+# ----------------------------------------
+
+print("")
+print("========================================")
+print("AUTOMATION COMPLETED SUCCESSFULLY")
+print("========================================")
+print(f"Generated: {content_file}")
+print(f"Processed product: {product_id}")
+print("Content verification: PASSED")
+print("Product consumption: SAFE")
+print("========================================")
+```
+
+if **name** == "**main**":
+main()
