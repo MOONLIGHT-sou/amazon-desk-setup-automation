@@ -8,8 +8,7 @@ PRODUCTS_FILE = "products.csv"
 CONTENT_DIR = "content"
 
 def find_first_unused_product():
-"""Find the first product whose used status is No."""
-
+"""Find the first product whose used status is 
 ```
 with open(PRODUCTS_FILE, "r", newline="", encoding="utf-8") as file:
     reader = csv.DictReader(file)
