@@ -1,1 +1,95 @@
+name: Test Amazon Desk Setup Automation
 
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: amazon-desk-setup-test
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      TEST_MODE: "true"
+      DRY_RUN: "true"
+
+    steps:
+      - name: Get repository files
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify P003 is protected before test
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv
+
+          with open("products.csv", newline="", encoding="utf-8") as file:
+              rows = list(csv.DictReader(file))
+
+          p003 = next((row for row in rows if row["product_id"] == "P003"), None)
+
+          if p003 is None:
+              raise SystemExit("SAFETY STOP: P003 was not found.")
+
+          if p003["used"].strip().lower() != "no":
+              raise SystemExit(
+                  f"SAFETY STOP: P003 is already marked {p003['used']!r}."
+              )
+
+          print("P003 protection check: PASS (P003 is No)")
+          PY
+
+      - name: Run automation in TEST_MODE
+        run: python main.py
+
+      - name: Verify test output
+        shell: bash
+        run: |
+          test -f ".test-output/P003/package.txt"
+          grep -F "P003" ".test-output/P003/package.txt"
+          grep -F "PINTEREST MAIN PIN" ".test-output/P003/package.txt"
+          grep -F "PINTEREST PRODUCT PIN" ".test-output/P003/package.txt"
+          echo "TEST_MODE output verification: PASS"
+
+      - name: Verify P003 is still protected
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv
+
+          with open("products.csv", newline="", encoding="utf-8") as file:
+              rows = list(csv.DictReader(file))
+
+          p003 = next((row for row in rows if row["product_id"] == "P003"), None)
+
+          if p003 is None:
+              raise SystemExit("SAFETY STOP: P003 disappeared from products.csv.")
+
+          if p003["used"].strip().lower() != "no":
+              raise SystemExit(
+                  f"SAFETY FAILURE: P003 changed to {p003['used']!r} during TEST_MODE."
+              )
+
+          print("P003 protection check after test: PASS (P003 is still No)")
+          PY
+
+      - name: Verify production database was not changed
+        shell: bash
+        run: |
+          if ! git diff --quiet -- products.csv; then
+            echo "SAFETY FAILURE: products.csv was modified during TEST_MODE."
+            git diff -- products.csv
+            exit 1
+          fi
+
+          echo "Production database integrity check: PASS"
