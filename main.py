@@ -1,304 +1,260 @@
-# main.py
-
 import csv
 import os
 import sys
+import tempfile
 
 PRODUCTS_FILE = "products.csv"
 CONTENT_DIR = "content"
+TEST_OUTPUT_DIR = ".test-output"
+REQUIRED_COLUMNS = {"product_id", "product_name", "category", "amazon_link", "used"}
 
-def find_first_unused_product():
-"""Find the first product whose used status is No."""
+def load_products(path=PRODUCTS_FILE):
+if not os.path.isfile(path):
+raise RuntimeError(f"Database not found: {path}")
 
-```
-with open(PRODUCTS_FILE, "r", newline="", encoding="utf-8") as file:
+with open(path, "r", newline="", encoding="utf-8") as file:
     reader = csv.DictReader(file)
+
+    if not reader.fieldnames or not REQUIRED_COLUMNS.issubset(reader.fieldnames):
+        raise RuntimeError(
+            "products.csv is missing one or more required columns."
+        )
+
     products = list(reader)
 
+ids = [product["product_id"].strip() for product in products]
+
+if any(not product_id for product_id in ids):
+    raise RuntimeError("Every product must have a product_id.")
+
+if len(ids) != len(set(ids)):
+    raise RuntimeError("Product IDs must be unique.")
+
+return products
+
+def select_first_unused(products):
 for product in products:
-    if product["used"].strip().lower() == "no":
-        return products, product
+if product["used"].strip().lower() == "no":
+return product
 
-return products, None
-```
+return None
 
-def generate_content(product):
-"""Generate the content package for the selected product."""
+def build_content(product):
+return f"""PRODUCT CONTENT PACKAGE
 
-```
-product_id = product["product_id"]
-product_name = product["product_name"]
-category = product["category"]
-amazon_link = product["amazon_link"]
-
-os.makedirs(CONTENT_DIR, exist_ok=True)
-
-content_file = os.path.join(
-    CONTENT_DIR,
-    f"{product_id}.txt"
-)
-
-content = f"""PRODUCT CONTENT PACKAGE
-```
-
-Product ID: {product_id}
-Product Name: {product_name}
-Category: {category}
-Amazon Link: {amazon_link}
+Product ID: {product['product_id']}
+Product Name: {product['product_name']}
+Category: {product['category']}
+Amazon Link: {product['amazon_link']}
 
 ==============================
 MEDIUM
-======
 
 Title:
-5 Amazon Desk Setup Products That Instantly Upgrade Your Workspace
+Amazon Desk Setup Upgrade: {product['product_name']}
 
 Subtitle:
-A simple desk upgrade can make your workspace feel cleaner, more comfortable, and more inspiring.
+A simple addition for a cleaner, more comfortable workspace.
 
 Product:
-{product_name}
+{product['product_name']}
 
 Why It Matters:
-A good desk setup is not only about appearance. The right products can make your workspace feel more organized, comfortable, and enjoyable to use.
-
-{product_name} can be a useful addition to a modern desk setup, especially for people who want to improve their workspace without completely redesigning it.
+{product['product_name']} can be a practical addition to a modern desk setup.
 
 Amazon:
-{amazon_link}
+{product['amazon_link']}
 
 ==============================
 PINTEREST MAIN PIN
-==================
 
 Title:
 Amazon Desk Setup Upgrade
 
 Description:
-Upgrade your workspace with simple Amazon desk setup products designed to make your desk cleaner, more comfortable, and more aesthetic.
+Upgrade your workspace with practical Amazon desk setup products.
 
 Featured Product:
-{product_name}
+{product['product_name']}
 
 Amazon:
-{amazon_link}
+{product['amazon_link']}
 
 ==============================
 PINTEREST PRODUCT PIN
-=====================
 
 Title:
-{product_name} — Desk Setup Upgrade
+{product['product_name']} — Desk Setup Upgrade
 
 Description:
-Give your desk a simple upgrade with {product_name}. A practical addition for anyone building a cleaner, more productive, and aesthetic workspace.
+Give your desk a simple upgrade with {product['product_name']}.
 
 Category:
-{category}
+{product['category']}
 
 Amazon:
-{amazon_link}
+{product['amazon_link']}
 
 ==============================
 END OF CONTENT PACKAGE
-======================
 
 """
 
-```
+def generate_and_verify(product, output_root):
+output_dir = os.path.join(output_root, product["product_id"])
+os.makedirs(output_dir, exist_ok=True)
+
+content_file = os.path.join(output_dir, "package.txt")
+
+content = build_content(product)
+
+if not content.strip():
+    raise RuntimeError("Generated content is empty.")
+
 with open(content_file, "w", encoding="utf-8") as file:
     file.write(content)
 
-return content_file
-```
-
-def verify_content_file(content_file, product):
-"""
-Verify that the generated content file exists,
-is not empty, and contains the expected product data.
-"""
-
-```
-product_id = product["product_id"]
-product_name = product["product_name"]
-
-print("")
-print("VERIFYING GENERATED CONTENT...")
-print(f"Expected file: {content_file}")
-
-# Check 1: File exists
 if not os.path.isfile(content_file):
     raise RuntimeError(
-        f"CONTENT VERIFICATION FAILED: "
-        f"{content_file} does not exist."
+        "Content verification failed: file does not exist."
     )
 
-print("✓ File exists")
-
-# Check 2: File is not empty
-file_size = os.path.getsize(content_file)
-
-if file_size == 0:
+if os.path.getsize(content_file) == 0:
     raise RuntimeError(
-        f"CONTENT VERIFICATION FAILED: "
-        f"{content_file} is empty."
+        "Content verification failed: file is empty."
     )
 
-print(f"✓ File is not empty ({file_size} bytes)")
-
-# Check 3: Read the generated file
 with open(content_file, "r", encoding="utf-8") as file:
-    generated_content = file.read()
+    saved_content = file.read()
 
-# Check 4: Product ID exists
-if product_id not in generated_content:
-    raise RuntimeError(
-        f"CONTENT VERIFICATION FAILED: "
-        f"Product ID {product_id} was not found in generated content."
-    )
+required_content = (
+    product["product_id"],
+    product["product_name"],
+    product["amazon_link"],
+    "MEDIUM",
+    "PINTEREST MAIN PIN",
+    "PINTEREST PRODUCT PIN",
+)
 
-print(f"✓ Product ID found: {product_id}")
+for required_text in required_content:
+    if required_text not in saved_content:
+        raise RuntimeError(
+            f"Content verification failed: missing '{required_text}'."
+        )
 
-# Check 5: Product name exists
-if product_name not in generated_content:
-    raise RuntimeError(
-        f"CONTENT VERIFICATION FAILED: "
-        f"Product name '{product_name}' was not found in generated content."
-    )
+return content_file
 
-print(f"✓ Product name found: {product_name}")
+def save_products_atomic(products, path=PRODUCTS_FILE):
+directory = os.path.dirname(path) or "."
 
-print("✓ CONTENT VERIFICATION PASSED")
+file_descriptor, temporary_path = tempfile.mkstemp(
+    prefix=".products-",
+    suffix=".tmp",
+    dir=directory,
+)
 
-return True
-```
+try:
+    with os.fdopen(
+        file_descriptor,
+        "w",
+        newline="",
+        encoding="utf-8",
+    ) as file:
 
-def mark_product_as_used(products, selected_product):
-"""Mark the successfully processed product as used."""
+        writer = csv.DictWriter(
+            file,
+            fieldnames=list(products[0].keys()),
+        )
 
-```
-product_id = selected_product["product_id"]
+        writer.writeheader()
+        writer.writerows(products)
 
-for product in products:
-    if product["product_id"] == product_id:
-        product["used"] = "Yes"
-        break
-```
+        file.flush()
+        os.fsync(file.fileno())
 
-def save_products(products):
-"""Save the updated products.csv."""
+    os.replace(temporary_path, path)
 
-```
-fieldnames = [
-    "product_id",
-    "product_name",
-    "category",
-    "amazon_link",
-    "used"
-]
-
-with open(
-    PRODUCTS_FILE,
-    "w",
-    newline="",
-    encoding="utf-8"
-) as file:
-
-    writer = csv.DictWriter(
-        file,
-        fieldnames=fieldnames
-    )
-
-    writer.writeheader()
-    writer.writerows(products)
-```
+finally:
+    if os.path.exists(temporary_path):
+        os.remove(temporary_path)
 
 def main():
-print("========================================")
-print("Amazon Desk Setup Automation")
-print("Stage 2.3B — Safe Content Generation")
-print("========================================")
+test_mode = (
+os.getenv("TEST_MODE", "false").strip().lower() == "true"
+)
 
-```
-# ----------------------------------------
-# STEP 1 — Find first unused product
-# ----------------------------------------
+dry_run = (
+    os.getenv("DRY_RUN", "false").strip().lower() == "true"
+)
 
-products, selected_product = find_first_unused_product()
+products = load_products()
+
+selected_product = select_first_unused(products)
 
 if selected_product is None:
-    print("")
     print("No unused products found.")
-    sys.exit(0)
+    return
 
 product_id = selected_product["product_id"]
 product_name = selected_product["product_name"]
 
-print("")
-print("SELECTED PRODUCT")
-print(f"Product ID: {product_id}")
-print(f"Product Name: {product_name}")
-
-# ----------------------------------------
-# STEP 2 — Generate content
-# ----------------------------------------
-
-print("")
-print("GENERATING CONTENT...")
-
-content_file = generate_content(selected_product)
-
-print(f"Content generated: {content_file}")
-
-# ----------------------------------------
-# STEP 3 — VERIFY CONTENT
-# ----------------------------------------
-# IMPORTANT:
-# The product is NOT marked as used before
-# this verification succeeds.
-
-verify_content_file(
-    content_file,
-    selected_product
+output_root = (
+    TEST_OUTPUT_DIR
+    if test_mode
+    else CONTENT_DIR
 )
 
-# ----------------------------------------
-# STEP 4 — ONLY NOW mark product as used
-# ----------------------------------------
+print("========================================")
+print("Stage 2.3B — Safe Content Generation")
+print("========================================")
+print(f"Mode: {'TEST' if test_mode else 'PRODUCTION'}")
+print(f"Dry run: {dry_run}")
+print(f"Selected: {product_id} — {product_name}")
 
-print("")
-print("CONTENT IS VERIFIED.")
-print("Product is now safe to mark as used.")
-
-mark_product_as_used(
-    products,
-    selected_product
+content_file = generate_and_verify(
+    selected_product,
+    output_root,
 )
 
-# ----------------------------------------
-# STEP 5 — Save products.csv
-# ----------------------------------------
+print(f"Content verified: {content_file}")
 
-save_products(products)
+if test_mode or dry_run:
+    print("No production state change made.")
+    return
 
-print("")
-print("PRODUCT STATUS UPDATED")
-print(f"{product_id}: No → Yes")
+# Re-read immediately before consumption so we do not
+# rely on stale product state.
+current_products = load_products()
 
-# ----------------------------------------
-# FINAL SUCCESS
-# ----------------------------------------
+current_product = next(
+    (
+        product
+        for product in current_products
+        if product["product_id"] == product_id
+    ),
+    None,
+)
 
-print("")
-print("========================================")
-print("AUTOMATION COMPLETED SUCCESSFULLY")
-print("========================================")
-print(f"Generated: {content_file}")
-print(f"Processed product: {product_id}")
-print("Content verification: PASSED")
-print("Product consumption: SAFE")
-print("========================================")
-```
+if current_product is None:
+    raise RuntimeError(
+        "Safety stop: selected product no longer exists."
+    )
 
-if **name** == "**main**":
+if current_product["used"].strip().lower() != "no":
+    raise RuntimeError(
+        "Safety stop: selected product is no longer unused. "
+        "products.csv was not changed."
+    )
+
+for product in current_products:
+    if product["product_id"] == product_id:
+        product["used"] = "Yes"
+        break
+
+save_products_atomic(current_products)
+
+print(f"Consumed safely: {product_id} No -> Yes")
+print("Automation completed successfully.")
+
+if name == "main":
 main()
