@@ -1,0 +1,288 @@
+name: Production - Amazon Desk Setup Automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_product_id:
+        description: "Product ID expected to be consumed"
+        required: true
+        default: "P003"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: amazon-desk-setup-production
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    name: Production Preflight
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout exact workflow revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Verify production target and repository state
+        shell: bash
+        env:
+          TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
+        run: |
+          set -euo pipefail
+
+          if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
+            echo "SAFETY STOP: Production may only run from main."
+            exit 1
+          fi
+
+          python - <<'PY'
+          import csv
+          import os
+
+          target_id = os.environ["TARGET_PRODUCT_ID"]
+
+          with open("products.csv", newline="", encoding="utf-8") as file:
+              rows = list(csv.DictReader(file))
+
+          target = next(
+              (row for row in rows if row["product_id"] == target_id),
+              None,
+          )
+
+          if target is None:
+              raise SystemExit(
+                  f"SAFETY STOP: target product {target_id} was not found."
+              )
+
+          if target["used"].strip().lower() != "no":
+              raise SystemExit(
+                  f"SAFETY STOP: target {target_id} is already "
+                  f"{target['used']!r}."
+              )
+
+          first_unused = next(
+              (
+                  row
+                  for row in rows
+                  if row["used"].strip().lower() == "no"
+              ),
+              None,
+          )
+
+          if first_unused is None:
+              raise SystemExit("SAFETY STOP: no unused products exist.")
+
+          if first_unused["product_id"] != target_id:
+              raise SystemExit(
+                  "SAFETY STOP: target does not match the first unused "
+                  f"product. Target={target_id}, "
+                  f"first_unused={first_unused['product_id']}."
+              )
+
+          print(
+              f"Production preflight PASS: "
+              f"{target_id} is the first unused product and is No."
+          )
+          PY
+
+          if ! git diff --quiet; then
+            echo "SAFETY STOP: checkout is not clean."
+            git status --short
+            exit 1
+          fi
+
+          echo "Workflow SHA: ${GITHUB_SHA}"
+          echo "Production preflight complete."
+
+  produce:
+    name: Production Execution
+    needs: preflight
+    runs-on: ubuntu-latest
+
+    environment:
+      name: production
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout exact reviewed revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Verify main has not moved
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch origin main --depth=1
+
+          CURRENT_MAIN="$(git rev-parse origin/main)"
+          WORKFLOW_SHA="${GITHUB_SHA}"
+
+          if [ "$CURRENT_MAIN" != "$WORKFLOW_SHA" ]; then
+            echo "SAFETY STOP: main changed after this production run was started."
+            echo "Workflow SHA: $WORKFLOW_SHA"
+            echo "Current main: $CURRENT_MAIN"
+            exit 1
+          fi
+
+          echo "Repository revision check: PASS"
+
+      - name: Verify target is still P003
+        shell: bash
+        env:
+          TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
+        run: |
+          set -euo pipefail
+
+          if [ "$TARGET_PRODUCT_ID" != "P003" ]; then
+            echo "SAFETY STOP: First production run is locked to P003."
+            echo "Received target: $TARGET_PRODUCT_ID"
+            exit 1
+          fi
+
+          python - <<'PY'
+          import csv
+          import os
+
+          target_id = os.environ["TARGET_PRODUCT_ID"]
+
+          with open("products.csv", newline="", encoding="utf-8") as file:
+              rows = list(csv.DictReader(file))
+
+          target = next(
+              (row for row in rows if row["product_id"] == target_id),
+              None,
+          )
+
+          if target is None:
+              raise SystemExit("SAFETY STOP: P003 was not found.")
+
+          if target["used"].strip().lower() != "no":
+              raise SystemExit(
+                  f"SAFETY STOP: P003 is already {target['used']!r}."
+              )
+
+          print("Final P003 pre-consumption check: PASS (P003 is No)")
+          PY
+
+      - name: Run automation in production mode
+        env:
+          TEST_MODE: "false"
+          DRY_RUN: "false"
+        run: |
+          python main.py
+
+      - name: Verify P003 was consumed and content exists
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f "content/P003/package.txt"
+          grep -F "P003" "content/P003/package.txt"
+          grep -F "PINTEREST MAIN PIN" "content/P003/package.txt"
+          grep -F "PINTEREST PRODUCT PIN" "content/P003/package.txt"
+
+          python - <<'PY'
+          import csv
+
+          with open("products.csv", newline="", encoding="utf-8") as file:
+              rows = list(csv.DictReader(file))
+
+          p003 = next(
+              (row for row in rows if row["product_id"] == "P003"),
+              None,
+          )
+
+          if p003 is None:
+              raise SystemExit("SAFETY FAILURE: P003 disappeared.")
+
+          if p003["used"].strip().lower() != "yes":
+              raise SystemExit(
+                  f"SAFETY FAILURE: P003 is {p003['used']!r}, "
+                  "expected Yes."
+              )
+
+          print("Production state verification: PASS")
+          print("P003 changed exactly as expected: No -> Yes")
+          PY
+
+      - name: Verify only expected files changed
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Git changes:"
+          git status --short
+
+          if ! git diff --quiet -- products.csv; then
+            echo "products.csv changed as expected."
+          else
+            echo "SAFETY FAILURE: products.csv did not change."
+            exit 1
+          fi
+
+          if ! test -f "content/P003/package.txt"; then
+            echo "SAFETY FAILURE: expected P003 content is missing."
+            exit 1
+          fi
+
+          UNEXPECTED="$(git status --porcelain=v1 | awk '
+            !($0 ~ /^ M products\.csv$/ ||
+              $0 ~ /^\?\? content\/P003\/package\.txt$/ ||
+              $0 ~ /^ M content\/P003\/package\.txt$/) {
+                print
+            }
+          ')"
+
+          if [ -n "$UNEXPECTED" ]; then
+            echo "SAFETY FAILURE: unexpected repository changes detected:"
+            echo "$UNEXPECTED"
+            exit 1
+          fi
+
+          echo "Changed-file scope verification: PASS"
+
+      - name: Commit production result
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add products.csv content/P003/package.txt
+
+          if git diff --cached --quiet; then
+            echo "SAFETY FAILURE: nothing staged for production commit."
+            exit 1
+          fi
+
+          git commit -m "Consume P003 and publish generated content"
+
+      - name: Push production result
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git push origin HEAD:main
+
+          echo "Production commit pushed successfully."
