@@ -103,15 +103,39 @@ END OF CONTENT PACKAGE
 """
 
 
-def generate_and_verify(product, output_root):
+def verify_content(content, product):
+    if not content.strip():
+        raise RuntimeError("Generated content is empty.")
+
+    required_content = (
+        product["product_id"],
+        product["product_name"],
+        product["category"],
+        product["amazon_link"],
+        "MEDIUM",
+        "PINTEREST MAIN PIN",
+        "PINTEREST PRODUCT PIN",
+    )
+
+    for required_text in required_content:
+        if not required_text or required_text not in content:
+            raise RuntimeError(
+                f"Content verification failed: missing '{required_text}'."
+            )
+
+
+def generate_and_verify(product, output_root, write_output=True):
+    content = build_content(product)
+    verify_content(content, product)
+
+    if not write_output:
+        print("Dry run: content verified in memory; no production file written.")
+        return None
+
     output_dir = os.path.join(output_root, product["product_id"])
     os.makedirs(output_dir, exist_ok=True)
 
     content_file = os.path.join(output_dir, "package.txt")
-    content = build_content(product)
-
-    if not content.strip():
-        raise RuntimeError("Generated content is empty.")
 
     with open(content_file, "w", encoding="utf-8") as file:
         file.write(content)
@@ -125,21 +149,7 @@ def generate_and_verify(product, output_root):
     with open(content_file, "r", encoding="utf-8") as file:
         saved_content = file.read()
 
-    required_content = (
-        product["product_id"],
-        product["product_name"],
-        product["amazon_link"],
-        "MEDIUM",
-        "PINTEREST MAIN PIN",
-        "PINTEREST PRODUCT PIN",
-    )
-
-    for required_text in required_content:
-        if required_text not in saved_content:
-            raise RuntimeError(
-                f"Content verification failed: missing '{required_text}'."
-            )
-
+    verify_content(saved_content, product)
     return content_file
 
 
@@ -189,6 +199,7 @@ def main():
     product_name = selected_product["product_name"]
 
     output_root = TEST_OUTPUT_DIR if test_mode else CONTENT_DIR
+    write_output = test_mode or not dry_run
 
     print("========================================")
     print("Stage 2.3B — Safe Content Generation")
@@ -197,8 +208,14 @@ def main():
     print(f"Dry run: {dry_run}")
     print(f"Selected: {product_id} — {product_name}")
 
-    content_file = generate_and_verify(selected_product, output_root)
-    print(f"Content verified: {content_file}")
+    content_file = generate_and_verify(
+        selected_product,
+        output_root,
+        write_output=write_output,
+    )
+
+    if content_file:
+        print(f"Content verified: {content_file}")
 
     if test_mode or dry_run:
         print("No production state change made.")
