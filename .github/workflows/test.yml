@@ -20,16 +20,18 @@ jobs:
 
     steps:
       - name: Get repository files
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
 
       - name: Verify P003 is protected before test
         shell: bash
         run: |
+          set -euo pipefail
+
           python - <<'PY'
           import csv
 
@@ -49,14 +51,28 @@ jobs:
           print("P003 protection check: PASS (P003 is No)")
           PY
 
+      - name: Record pre-test repository state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --porcelain=v1
+          git ls-files -s > /tmp/tracked-before.txt
+          git status --porcelain=v1 > /tmp/status-before.txt
+
       - name: Run automation in TEST_MODE
         run: python main.py
 
       - name: Verify test output
         shell: bash
         run: |
+          set -euo pipefail
+
           test -f ".test-output/P003/package.txt"
           grep -F "P003" ".test-output/P003/package.txt"
+          grep -F "Mechanical Keyboard" ".test-output/P003/package.txt"
+          grep -F "Minimal Desk Setup" ".test-output/P003/package.txt"
+          grep -F "https://amzn.to/44hNliy" ".test-output/P003/package.txt"
+          grep -F "MEDIUM" ".test-output/P003/package.txt"
           grep -F "PINTEREST MAIN PIN" ".test-output/P003/package.txt"
           grep -F "PINTEREST PRODUCT PIN" ".test-output/P003/package.txt"
           echo "TEST_MODE output verification: PASS"
@@ -64,6 +80,8 @@ jobs:
       - name: Verify P003 is still protected
         shell: bash
         run: |
+          set -euo pipefail
+
           python - <<'PY'
           import csv
 
@@ -83,13 +101,51 @@ jobs:
           print("P003 protection check after test: PASS (P003 is still No)")
           PY
 
-      - name: Verify production database was not changed
+      - name: Verify no production files changed
         shell: bash
         run: |
+          set -euo pipefail
+
           if ! git diff --quiet -- products.csv; then
             echo "SAFETY FAILURE: products.csv was modified during TEST_MODE."
             git diff -- products.csv
             exit 1
           fi
 
-          echo "Production database integrity check: PASS"
+          if git diff --quiet -- content; then
+            echo "Production content tree unchanged: PASS"
+          else
+            echo "SAFETY FAILURE: content/ changed during TEST_MODE."
+            git diff -- content
+            exit 1
+          fi
+
+          if git diff --quiet -- main.py .github/workflows README.md; then
+            echo "Tracked production files unchanged: PASS"
+          else
+            echo "SAFETY FAILURE: tracked production files changed during TEST_MODE."
+            git diff -- main.py .github/workflows README.md
+            exit 1
+          fi
+
+      - name: Verify only test output was created
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          UNEXPECTED="$(git status --porcelain=v1 | awk '
+            !($0 ~ /^\?\? \.test-output\//) { print }
+          ')"
+
+          if [ -n "$UNEXPECTED" ]; then
+            echo "SAFETY FAILURE: unexpected repository changes detected:"
+            echo "$UNEXPECTED"
+            exit 1
+          fi
+
+          if [ ! -f ".test-output/P003/package.txt" ]; then
+            echo "SAFETY FAILURE: expected TEST_MODE output is missing."
+            exit 1
+          fi
+
+          echo "TEST_MODE filesystem isolation: PASS"
