@@ -54,45 +54,26 @@ jobs:
           with open("products.csv", newline="", encoding="utf-8") as file:
               rows = list(csv.DictReader(file))
 
-          target = next(
-              (row for row in rows if row["product_id"] == target_id),
-              None,
-          )
+          target = next((row for row in rows if row["product_id"] == target_id), None)
 
           if target is None:
-              raise SystemExit(
-                  f"SAFETY STOP: target product {target_id} was not found."
-              )
+              raise SystemExit(f"SAFETY STOP: target product {target_id} was not found.")
 
           if target["used"].strip().lower() != "no":
-              raise SystemExit(
-                  f"SAFETY STOP: target {target_id} is already "
-                  f"{target['used']!r}."
-              )
+              raise SystemExit(f"SAFETY STOP: target {target_id} is already {target['used']!r}.")
 
-          first_unused = next(
-              (
-                  row
-                  for row in rows
-                  if row["used"].strip().lower() == "no"
-              ),
-              None,
-          )
+          first_unused = next((row for row in rows if row["used"].strip().lower() == "no"), None)
 
           if first_unused is None:
               raise SystemExit("SAFETY STOP: no unused products exist.")
 
           if first_unused["product_id"] != target_id:
               raise SystemExit(
-                  "SAFETY STOP: target does not match the first unused "
-                  f"product. Target={target_id}, "
-                  f"first_unused={first_unused['product_id']}."
+                  "SAFETY STOP: target does not match the first unused product. "
+                  f"Target={target_id}, first_unused={first_unused['product_id']}."
               )
 
-          print(
-              f"Production preflight PASS: "
-              f"{target_id} is the first unused product and is No."
-          )
+          print(f"Production preflight PASS: {target_id} is the first unused product and is No.")
           PY
 
           if ! git diff --quiet; then
@@ -133,7 +114,6 @@ jobs:
           set -euo pipefail
 
           git fetch origin main --depth=1
-
           CURRENT_MAIN="$(git rev-parse origin/main)"
           WORKFLOW_SHA="${GITHUB_SHA}"
 
@@ -168,18 +148,13 @@ jobs:
           with open("products.csv", newline="", encoding="utf-8") as file:
               rows = list(csv.DictReader(file))
 
-          target = next(
-              (row for row in rows if row["product_id"] == target_id),
-              None,
-          )
+          target = next((row for row in rows if row["product_id"] == target_id), None)
 
           if target is None:
               raise SystemExit("SAFETY STOP: P003 was not found.")
 
           if target["used"].strip().lower() != "no":
-              raise SystemExit(
-                  f"SAFETY STOP: P003 is already {target['used']!r}."
-              )
+              raise SystemExit(f"SAFETY STOP: P003 is already {target['used']!r}.")
 
           print("Final P003 pre-consumption check: PASS (P003 is No)")
           PY
@@ -188,41 +163,62 @@ jobs:
         env:
           TEST_MODE: "false"
           DRY_RUN: "false"
-        run: |
-          python main.py
+        run: python main.py
 
-      - name: Verify P003 was consumed and content exists
+      - name: Verify P003 content and exact database mutation
         shell: bash
         run: |
           set -euo pipefail
 
           test -f "content/P003/package.txt"
           grep -F "P003" "content/P003/package.txt"
+          grep -F "Mechanical Keyboard" "content/P003/package.txt"
+          grep -F "Minimal Desk Setup" "content/P003/package.txt"
+          grep -F "https://amzn.to/44hNliy" "content/P003/package.txt"
+          grep -F "MEDIUM" "content/P003/package.txt"
           grep -F "PINTEREST MAIN PIN" "content/P003/package.txt"
           grep -F "PINTEREST PRODUCT PIN" "content/P003/package.txt"
 
           python - <<'PY'
           import csv
+          import subprocess
 
           with open("products.csv", newline="", encoding="utf-8") as file:
-              rows = list(csv.DictReader(file))
+              after = list(csv.DictReader(file))
 
-          p003 = next(
-              (row for row in rows if row["product_id"] == "P003"),
-              None,
+          before_text = subprocess.check_output(
+              ["git", "show", "HEAD:products.csv"], text=True
           )
+          before = list(csv.DictReader(before_text.splitlines()))
 
-          if p003 is None:
-              raise SystemExit("SAFETY FAILURE: P003 disappeared.")
+          if len(before) != len(after):
+              raise SystemExit("SAFETY FAILURE: products.csv row count changed.")
 
-          if p003["used"].strip().lower() != "yes":
-              raise SystemExit(
-                  f"SAFETY FAILURE: P003 is {p003['used']!r}, "
-                  "expected Yes."
-              )
+          before_by_id = {row["product_id"]: row for row in before}
+          after_by_id = {row["product_id"]: row for row in after}
 
-          print("Production state verification: PASS")
-          print("P003 changed exactly as expected: No -> Yes")
+          if set(before_by_id) != set(after_by_id):
+              raise SystemExit("SAFETY FAILURE: product IDs changed.")
+
+          for product_id in before_by_id:
+              before_row = before_by_id[product_id]
+              after_row = after_by_id[product_id]
+              for column in before_row:
+                  if column == "used" and product_id == "P003":
+                      continue
+                  if before_row[column] != after_row[column]:
+                      raise SystemExit(
+                          f"SAFETY FAILURE: unexpected products.csv change "
+                          f"at {product_id}.{column}."
+                      )
+
+          if before_by_id["P003"]["used"].strip().lower() != "no":
+              raise SystemExit("SAFETY FAILURE: P003 was not No before mutation.")
+          if after_by_id["P003"]["used"].strip().lower() != "yes":
+              raise SystemExit("SAFETY FAILURE: P003 did not change No -> Yes.")
+
+          print("Exact database mutation verification: PASS")
+          print("Only P003.used changed: No -> Yes")
           PY
 
       - name: Verify only expected files changed
@@ -230,27 +226,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "Git changes:"
-          git status --short
-
-          if ! git diff --quiet -- products.csv; then
-            echo "products.csv changed as expected."
-          else
-            echo "SAFETY FAILURE: products.csv did not change."
-            exit 1
-          fi
-
-          if ! test -f "content/P003/package.txt"; then
-            echo "SAFETY FAILURE: expected P003 content is missing."
-            exit 1
-          fi
-
           UNEXPECTED="$(git status --porcelain=v1 | awk '
             !($0 ~ /^ M products\.csv$/ ||
               $0 ~ /^\?\? content\/P003\/package\.txt$/ ||
-              $0 ~ /^ M content\/P003\/package\.txt$/) {
-                print
-            }
+              $0 ~ /^ M content\/P003\/package\.txt$/) { print }
           ')"
 
           if [ -n "$UNEXPECTED" ]; then
@@ -259,7 +238,30 @@ jobs:
             exit 1
           fi
 
+          if git diff --quiet -- products.csv; then
+            echo "SAFETY FAILURE: products.csv did not change."
+            exit 1
+          fi
+
+          test -f "content/P003/package.txt"
           echo "Changed-file scope verification: PASS"
+
+      - name: Final main check before commit
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch origin main --depth=1
+          CURRENT_MAIN="$(git rev-parse origin/main)"
+
+          if [ "$CURRENT_MAIN" != "$GITHUB_SHA" ]; then
+            echo "SAFETY STOP: main changed during production execution."
+            echo "Workflow SHA: $GITHUB_SHA"
+            echo "Current main: $CURRENT_MAIN"
+            exit 1
+          fi
+
+          echo "Final repository revision check: PASS"
 
       - name: Commit production result
         shell: bash
@@ -278,11 +280,26 @@ jobs:
 
           git commit -m "Consume P003 and publish generated content"
 
-      - name: Push production result
+      - name: Final main check before push
         shell: bash
         run: |
           set -euo pipefail
 
-          git push origin HEAD:main
+          git fetch origin main --depth=1
+          CURRENT_MAIN="$(git rev-parse origin/main)"
 
+          if [ "$CURRENT_MAIN" != "$GITHUB_SHA" ]; then
+            echo "SAFETY STOP: main changed before production push."
+            echo "Workflow SHA: $GITHUB_SHA"
+            echo "Current main: $CURRENT_MAIN"
+            exit 1
+          fi
+
+          echo "Final pre-push repository revision check: PASS"
+
+      - name: Push production result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin HEAD:main
           echo "Production commit pushed successfully."
