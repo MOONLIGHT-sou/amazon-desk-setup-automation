@@ -226,7 +226,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          UNEXPECTED="$(git status --porcelain=v1 | awk '
+          UNEXPECTED="$(git status --porcelain=v1 --untracked-files=all | awk '
             !($0 ~ /^ M products\.csv$/ ||
               $0 ~ /^\?\? content\/P003\/package\.txt$/ ||
               $0 ~ /^ M content\/P003\/package\.txt$/) { print }
