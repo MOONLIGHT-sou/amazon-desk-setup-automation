@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       target_product_id:
-        description: "Product ID expected to be consumed"
+        description: "Product ID expected to be consumed; must be the current first-unused product"
         required: true
-        default: "P003"
+        default: "P004"
         type: string
 
 permissions:
@@ -49,7 +49,7 @@ jobs:
           import csv
           import os
 
-          target_id = os.environ["TARGET_PRODUCT_ID"]
+          target_id = os.environ["TARGET_PRODUCT_ID"].strip()
 
           with open("products.csv", newline="", encoding="utf-8") as file:
               rows = list(csv.DictReader(file))
@@ -126,37 +126,34 @@ jobs:
 
           echo "Repository revision check: PASS"
 
-      - name: Verify target is still P003
+      - name: Verify target is still the current first-unused product
         shell: bash
         env:
           TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
         run: |
           set -euo pipefail
 
-          if [ "$TARGET_PRODUCT_ID" != "P003" ]; then
-            echo "SAFETY STOP: First production run is locked to P003."
-            echo "Received target: $TARGET_PRODUCT_ID"
-            exit 1
-          fi
-
           python - <<'PY'
           import csv
           import os
 
-          target_id = os.environ["TARGET_PRODUCT_ID"]
+          target_id = os.environ["TARGET_PRODUCT_ID"].strip()
 
           with open("products.csv", newline="", encoding="utf-8") as file:
               rows = list(csv.DictReader(file))
 
-          target = next((row for row in rows if row["product_id"] == target_id), None)
+          first_unused = next((row for row in rows if row["used"].strip().lower() == "no"), None)
 
-          if target is None:
-              raise SystemExit("SAFETY STOP: P003 was not found.")
+          if first_unused is None:
+              raise SystemExit("SAFETY STOP: no unused product remains.")
 
-          if target["used"].strip().lower() != "no":
-              raise SystemExit(f"SAFETY STOP: P003 is already {target['used']!r}.")
+          if first_unused["product_id"] != target_id:
+              raise SystemExit(
+                  "SAFETY STOP: target changed before execution. "
+                  f"Requested={target_id}, current_first_unused={first_unused['product_id']}."
+              )
 
-          print("Final P003 pre-consumption check: PASS (P003 is No)")
+          print(f"Final target check: PASS ({target_id} is still first-unused and No)")
           PY
 
       - name: Run automation in production mode
@@ -165,71 +162,78 @@ jobs:
           DRY_RUN: "false"
         run: python main.py
 
-      - name: Verify P003 content and exact database mutation
+      - name: Verify target content and exact database mutation
         shell: bash
+        env:
+          TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
         run: |
           set -euo pipefail
 
-          test -f "content/P003/package.txt"
-          grep -F "P003" "content/P003/package.txt"
-          grep -F "Mechanical Keyboard" "content/P003/package.txt"
-          grep -F "Minimal Desk Setup" "content/P003/package.txt"
-          grep -F "https://amzn.to/44hNliy" "content/P003/package.txt"
-          grep -F "MEDIUM" "content/P003/package.txt"
-          grep -F "PINTEREST MAIN PIN" "content/P003/package.txt"
-          grep -F "PINTEREST PRODUCT PIN" "content/P003/package.txt"
+          CONTENT_FILE="content/${TARGET_PRODUCT_ID}/package.txt"
+          test -f "$CONTENT_FILE"
 
           python - <<'PY'
           import csv
+          import os
           import subprocess
+
+          target_id = os.environ["TARGET_PRODUCT_ID"].strip()
+          content_file = os.path.join("content", target_id, "package.txt")
+          content = open(content_file, encoding="utf-8").read()
+
+          before_text = subprocess.check_output(["git", "show", "HEAD:products.csv"], text=True)
+          before = list(csv.DictReader(before_text.splitlines()))
 
           with open("products.csv", newline="", encoding="utf-8") as file:
               after = list(csv.DictReader(file))
-
-          before_text = subprocess.check_output(
-              ["git", "show", "HEAD:products.csv"], text=True
-          )
-          before = list(csv.DictReader(before_text.splitlines()))
-
-          if len(before) != len(after):
-              raise SystemExit("SAFETY FAILURE: products.csv row count changed.")
 
           before_by_id = {row["product_id"]: row for row in before}
           after_by_id = {row["product_id"]: row for row in after}
 
           if set(before_by_id) != set(after_by_id):
               raise SystemExit("SAFETY FAILURE: product IDs changed.")
+          if len(before) != len(after):
+              raise SystemExit("SAFETY FAILURE: products.csv row count changed.")
+
+          if target_id not in before_by_id:
+              raise SystemExit("SAFETY FAILURE: target did not exist before execution.")
+          if before_by_id[target_id]["used"].strip().lower() != "no":
+              raise SystemExit("SAFETY FAILURE: target was not No before execution.")
+          if after_by_id[target_id]["used"].strip().lower() != "yes":
+              raise SystemExit("SAFETY FAILURE: target did not change No -> Yes.")
 
           for product_id in before_by_id:
-              before_row = before_by_id[product_id]
-              after_row = after_by_id[product_id]
-              for column in before_row:
-                  if column == "used" and product_id == "P003":
+              for column in before_by_id[product_id]:
+                  if product_id == target_id and column == "used":
                       continue
-                  if before_row[column] != after_row[column]:
+                  if before_by_id[product_id][column] != after_by_id[product_id][column]:
                       raise SystemExit(
-                          f"SAFETY FAILURE: unexpected products.csv change "
-                          f"at {product_id}.{column}."
+                          f"SAFETY FAILURE: unexpected products.csv change at {product_id}.{column}."
                       )
 
-          if before_by_id["P003"]["used"].strip().lower() != "no":
-              raise SystemExit("SAFETY FAILURE: P003 was not No before mutation.")
-          if after_by_id["P003"]["used"].strip().lower() != "yes":
-              raise SystemExit("SAFETY FAILURE: P003 did not change No -> Yes.")
+          target = after_by_id[target_id]
+          required = (target_id, target["product_name"], target["category"], target["amazon_link"])
+          for value in required:
+              if value not in content:
+                  raise SystemExit(f"SAFETY FAILURE: generated content is missing {value!r}.")
 
-          print("Exact database mutation verification: PASS")
-          print("Only P003.used changed: No -> Yes")
+          for marker in ("MEDIUM", "PINTEREST MAIN PIN", "PINTEREST PRODUCT PIN", "CONTENT QUALITY"):
+              if marker not in content:
+                  raise SystemExit(f"SAFETY FAILURE: generated content is missing {marker!r}.")
+
+          print(f"Exact production verification: PASS ({target_id} No -> Yes)")
           PY
 
       - name: Verify only expected files changed
         shell: bash
+        env:
+          TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
         run: |
           set -euo pipefail
 
-          UNEXPECTED="$(git status --porcelain=v1 --untracked-files=all | awk '
-            !($0 ~ /^ M products\.csv$/ ||
-              $0 ~ /^\?\? content\/P003\/package\.txt$/ ||
-              $0 ~ /^ M content\/P003\/package\.txt$/) { print }
+          CONTENT_FILE="content/${TARGET_PRODUCT_ID}/package.txt"
+          UNEXPECTED="$(git status --porcelain=v1 --untracked-files=all | awk -v expected="$CONTENT_FILE" '
+            !($0 ~ /^ M products\.csv$/ || $0 ~ ("^\\?\\? " expected "$")) { print }
           ')"
 
           if [ -n "$UNEXPECTED" ]; then
@@ -243,7 +247,7 @@ jobs:
             exit 1
           fi
 
-          test -f "content/P003/package.txt"
+          test -f "$CONTENT_FILE"
           echo "Changed-file scope verification: PASS"
 
       - name: Final main check before commit
@@ -265,20 +269,22 @@ jobs:
 
       - name: Commit production result
         shell: bash
+        env:
+          TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
         run: |
           set -euo pipefail
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add products.csv content/P003/package.txt
+          git add products.csv "content/${TARGET_PRODUCT_ID}/package.txt"
 
           if git diff --cached --quiet; then
             echo "SAFETY FAILURE: nothing staged for production commit."
             exit 1
           fi
 
-          git commit -m "Consume P003 and publish generated content"
+          git commit -m "Consume ${TARGET_PRODUCT_ID} and publish generated content"
 
       - name: Final main check before push
         shell: bash
