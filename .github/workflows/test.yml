@@ -17,6 +17,7 @@ jobs:
     env:
       TEST_MODE: "true"
       DRY_RUN: "true"
+      PYTHONDONTWRITEBYTECODE: "1"
 
     steps:
       - name: Get repository files
