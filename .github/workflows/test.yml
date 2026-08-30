@@ -76,11 +76,14 @@ jobs:
           grep -F "PINTEREST MAIN PIN" "$OUTPUT_FILE"
           grep -F "PINTEREST PRODUCT PIN" "$OUTPUT_FILE"
           grep -F "CONTENT QUALITY" "$OUTPUT_FILE"
+          grep -F "(paid link)" "$OUTPUT_FILE"
+          grep -F "As an Amazon Associate I earn from qualifying purchases." "$OUTPUT_FILE"
+          grep -F "Human review before publication: REQUIRED" "$OUTPUT_FILE"
 
           python - <<'PY'
           import csv
           import os
-          import re
+          from main import verify_content
 
           target_id = open("/tmp/test-target.txt", encoding="utf-8").read().strip()
 
@@ -93,13 +96,8 @@ jobs:
               encoding="utf-8",
           ).read()
 
-          if re.search(r"\{[^}]+\}|\[INSERT|TODO|PLACEHOLDER", content, re.IGNORECASE):
-              raise SystemExit("SAFETY FAILURE: unresolved placeholder detected in TEST_MODE output.")
-
-          if target["product_name"] not in content or target["amazon_link"] not in content:
-              raise SystemExit("SAFETY FAILURE: test output does not match the selected product.")
-
-          print("TEST_MODE output and quality verification: PASS")
+          verify_content(content, target)
+          print("Independent TEST_MODE quality/compliance verification: PASS")
           PY
 
       - name: Verify selected product is still protected
