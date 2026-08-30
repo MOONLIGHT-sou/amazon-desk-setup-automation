@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Verify P003 is protected before test
+      - name: Identify current first-unused product
         shell: bash
         run: |
           set -euo pipefail
@@ -38,17 +38,16 @@ jobs:
           with open("products.csv", newline="", encoding="utf-8") as file:
               rows = list(csv.DictReader(file))
 
-          p003 = next((row for row in rows if row["product_id"] == "P003"), None)
+          target = next((row for row in rows if row["used"].strip().lower() == "no"), None)
 
-          if p003 is None:
-              raise SystemExit("SAFETY STOP: P003 was not found.")
+          if target is None:
+              raise SystemExit("SAFETY STOP: no unused product exists for TEST_MODE.")
 
-          if p003["used"].strip().lower() != "no":
-              raise SystemExit(
-                  f"SAFETY STOP: P003 is already marked {p003['used']!r}."
-              )
+          with open("/tmp/test-target.txt", "w", encoding="utf-8") as file:
+              file.write(target["product_id"])
 
-          print("P003 protection check: PASS (P003 is No)")
+          print(f"TEST_MODE target: {target['product_id']} — {target['product_name']}")
+          print(f"TEST_MODE target protection: PASS ({target['product_id']} is No)")
           PY
 
       - name: Record pre-test repository state
@@ -62,43 +61,73 @@ jobs:
       - name: Run automation in TEST_MODE
         run: python main.py
 
-      - name: Verify test output
+      - name: Verify test output and quality gate
         shell: bash
         run: |
           set -euo pipefail
 
-          test -f ".test-output/P003/package.txt"
-          grep -F "P003" ".test-output/P003/package.txt"
-          grep -F "Mechanical Keyboard" ".test-output/P003/package.txt"
-          grep -F "Minimal Desk Setup" ".test-output/P003/package.txt"
-          grep -F "https://amzn.to/44hNliy" ".test-output/P003/package.txt"
-          grep -F "MEDIUM" ".test-output/P003/package.txt"
-          grep -F "PINTEREST MAIN PIN" ".test-output/P003/package.txt"
-          grep -F "PINTEREST PRODUCT PIN" ".test-output/P003/package.txt"
-          echo "TEST_MODE output verification: PASS"
+          TARGET_ID="$(cat /tmp/test-target.txt)"
+          OUTPUT_FILE=".test-output/${TARGET_ID}/package.txt"
 
-      - name: Verify P003 is still protected
-        shell: bash
-        run: |
-          set -euo pipefail
+          test -f "$OUTPUT_FILE"
+          grep -F "$TARGET_ID" "$OUTPUT_FILE"
+          grep -F "Amazon Link:" "$OUTPUT_FILE"
+          grep -F "MEDIUM" "$OUTPUT_FILE"
+          grep -F "PINTEREST MAIN PIN" "$OUTPUT_FILE"
+          grep -F "PINTEREST PRODUCT PIN" "$OUTPUT_FILE"
+          grep -F "CONTENT QUALITY" "$OUTPUT_FILE"
 
           python - <<'PY'
           import csv
+          import os
+          import re
+
+          target_id = open("/tmp/test-target.txt", encoding="utf-8").read().strip()
 
           with open("products.csv", newline="", encoding="utf-8") as file:
               rows = list(csv.DictReader(file))
 
-          p003 = next((row for row in rows if row["product_id"] == "P003"), None)
+          target = next(row for row in rows if row["product_id"] == target_id)
+          content = open(
+              os.path.join(".test-output", target_id, "package.txt"),
+              encoding="utf-8",
+          ).read()
 
-          if p003 is None:
-              raise SystemExit("SAFETY STOP: P003 disappeared from products.csv.")
+          if re.search(r"\{[^}]+\}|\[INSERT|TODO|PLACEHOLDER", content, re.IGNORECASE):
+              raise SystemExit("SAFETY FAILURE: unresolved placeholder detected in TEST_MODE output.")
 
-          if p003["used"].strip().lower() != "no":
+          if target["product_name"] not in content or target["amazon_link"] not in content:
+              raise SystemExit("SAFETY FAILURE: test output does not match the selected product.")
+
+          print("TEST_MODE output and quality verification: PASS")
+          PY
+
+      - name: Verify selected product is still protected
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TARGET_ID="$(cat /tmp/test-target.txt)"
+
+          python - <<'PY'
+          import csv
+
+          target_id = open("/tmp/test-target.txt", encoding="utf-8").read().strip()
+
+          with open("products.csv", newline="", encoding="utf-8") as file:
+              rows = list(csv.DictReader(file))
+
+          target = next((row for row in rows if row["product_id"] == target_id), None)
+
+          if target is None:
+              raise SystemExit("SAFETY FAILURE: selected product disappeared from products.csv.")
+
+          if target["used"].strip().lower() != "no":
               raise SystemExit(
-                  f"SAFETY FAILURE: P003 changed to {p003['used']!r} during TEST_MODE."
+                  f"SAFETY FAILURE: {target_id} changed to {target['used']!r} during TEST_MODE."
               )
 
-          print("P003 protection check after test: PASS (P003 is still No)")
+          print(f"Selected product protection after test: PASS ({target_id} is still No)")
           PY
 
       - name: Verify no production files changed
@@ -133,7 +162,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          UNEXPECTED="$(git status --porcelain=v1 | awk '
+          UNEXPECTED="$(git status --porcelain=v1 --untracked-files=all | awk '
             !($0 ~ /^\?\? \.test-output\//) { print }
           ')"
 
@@ -143,9 +172,6 @@ jobs:
             exit 1
           fi
 
-          if [ ! -f ".test-output/P003/package.txt" ]; then
-            echo "SAFETY FAILURE: expected TEST_MODE output is missing."
-            exit 1
-          fi
-
+          TARGET_ID="$(cat /tmp/test-target.txt)"
+          test -f ".test-output/${TARGET_ID}/package.txt"
           echo "TEST_MODE filesystem isolation: PASS"
