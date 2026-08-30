@@ -175,3 +175,12 @@ jobs:
           TARGET_ID="$(cat /tmp/test-target.txt)"
           test -f ".test-output/${TARGET_ID}/package.txt"
           echo "TEST_MODE filesystem isolation: PASS"
+
+      - name: Upload TEST_MODE output for human review
+        if: ${{ success() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-output-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .test-output/**/package.txt
+          if-no-files-found: error
+          retention-days: 7
