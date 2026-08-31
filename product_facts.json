@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "facts": {
+    "P004": {
+      "product_name": "Quntis Monitor Light Bar Focus",
+      "variant": "16.1 inch (41 cm), Grey",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://amzn.to/449KYhR",
+      "verified_on": "2026-08-30",
+      "verification_method": "Human verification from current Amazon India listing screenshot, corroborated against Quntis product-family information.",
+      "safe_facts": [
+        "Quntis Monitor Light Bar Focus",
+        "16.1 inch (41 cm)",
+        "Grey",
+        "Monitor-mounted light bar",
+        "Adjustable brightness",
+        "Adjustable color temperature"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Universal monitor compatibility",
+        "Guaranteed glare reduction",
+        "Guaranteed eye-fatigue reduction"
+      ],
+      "editorial_note": "Use the Amazon listing as the source of truth for current price, availability, specifications, compatibility, and variant details. Do not infer facts from another Quntis variant."
+    }
+  }
+}
