@@ -17,6 +17,15 @@ WEIGHTS = {
 
 CONFIDENCE_RANK = {"unknown": 0, "low": 1, "medium": 2, "high": 3}
 HARD_GATES = ("identity", "niche_fit", "fact_verifiability")
+EVIDENCE_LABELS = {
+    "demand": "demand / purchase signal",
+    "review_volume": "review volume",
+    "rating_context": "rating with review-count context",
+    "review_themes": "recurring review themes",
+    "niche_fit": "niche fit",
+    "fact_verifiability": "verifiable product facts",
+    "content_potential": "content potential",
+}
 
 
 def load_evidence(path=EVIDENCE_FILE):
@@ -49,6 +58,17 @@ def signal_value(signal):
     return value, confidence, True
 
 
+def missing_evidence_priorities(product):
+    missing = []
+    for name, weight in WEIGHTS.items():
+        _, _, available = signal_value(product.get(name))
+        if not available:
+            missing.append((weight, EVIDENCE_LABELS[name]))
+
+    missing.sort(key=lambda item: (-item[0], item[1]))
+    return [label for _, label in missing]
+
+
 def evaluate(product_id, evidence):
     product = evidence.get(product_id)
     if product is None:
@@ -59,6 +79,7 @@ def evaluate(product_id, evidence):
             "evidence_coverage": 0,
             "opportunity_score": 0,
             "reasons": ["No evidence record exists."],
+            "next_evidence": list(EVIDENCE_LABELS.values()),
         }
 
     reasons = []
@@ -87,8 +108,6 @@ def evaluate(product_id, evidence):
     opportunity_score = round((weighted_score / available_weight) * 100, 1) if available_weight else 0.0
     evidence_coverage = round((available_weight / sum(WEIGHTS.values())) * 100, 1)
 
-    # Unknown signals do not poison the confidence of evidence that actually exists.
-    # Hard-gate unknowns still force HOLD and therefore remain visible in reasons.
     gate_confidences = [
         normalize_confidence(gate.get("confidence"))
         for gate in (identity, niche, facts)
@@ -109,6 +128,8 @@ def evaluate(product_id, evidence):
     else:
         decision = "DEFER"
 
+    next_evidence = missing_evidence_priorities(product)
+
     if evidence_coverage < 60:
         reasons.append("Evidence coverage is below the review threshold.")
     if opportunity_score >= 80 and evidence_coverage >= 60:
@@ -120,6 +141,9 @@ def evaluate(product_id, evidence):
     else:
         reasons.append("No scored evidence is available.")
 
+    if next_evidence:
+        reasons.append("Highest-value missing evidence: " + ", ".join(next_evidence[:3]) + ".")
+
     return {
         "product_id": product_id,
         "decision": decision,
@@ -127,6 +151,7 @@ def evaluate(product_id, evidence):
         "evidence_coverage": evidence_coverage,
         "opportunity_score": opportunity_score,
         "reasons": reasons,
+        "next_evidence": next_evidence,
     }
 
 
