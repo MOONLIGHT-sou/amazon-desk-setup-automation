@@ -30,7 +30,7 @@ def select_candidate(products, report):
     if not eligible:
         return None
 
-    eligible.sort(key=lambda item: item[:5], reverse=True)
+    eligible.sort(key=lambda item: (-item[0], -item[1], -item[2], -item[3], item[4]))
     _, _, _, _, _, product, result = eligible[0]
     return {"product": product, "selection": result}
 
