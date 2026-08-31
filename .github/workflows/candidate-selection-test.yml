@@ -1,0 +1,67 @@
+name: Candidate Selection - Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    name: Verify intelligent unused-product selection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Run selection intelligence
+        env:
+          SELECTION_REPORT: /tmp/selection_report.json
+        run: python selection_intelligence.py
+
+      - name: Verify selector with real repository state
+        run: |
+          python - <<'PY'
+          import csv, json
+          from candidate_selector import select_candidate
+
+          with open('products.csv', newline='', encoding='utf-8') as file:
+              products = list(csv.DictReader(file))
+          with open('/tmp/selection_report.json', encoding='utf-8') as file:
+              report = json.load(file)
+
+          selected = select_candidate(products, report)
+          assert selected is None, 'No current unused product has passed the intelligence gates.'
+          print('Real-state selection check: PASS (P005 remains protected from selection)')
+          PY
+
+      - name: Verify ranking logic with controlled candidates
+        run: |
+          python - <<'PY'
+          from candidate_selector import select_candidate
+
+          products = [
+              {'product_id': 'P010', 'used': 'No'},
+              {'product_id': 'P011', 'used': 'No'},
+              {'product_id': 'P012', 'used': 'No'},
+              {'product_id': 'P013', 'used': 'Yes'},
+          ]
+          report = {'results': [
+              {'product_id': 'P010', 'decision': 'REVIEW', 'confidence': 'high', 'evidence_coverage': 90, 'opportunity_score': 92},
+              {'product_id': 'P011', 'decision': 'APPROVE', 'confidence': 'medium', 'evidence_coverage': 85, 'opportunity_score': 78},
+              {'product_id': 'P012', 'decision': 'HOLD', 'confidence': 'high', 'evidence_coverage': 95, 'opportunity_score': 99},
+              {'product_id': 'P013', 'decision': 'APPROVE', 'confidence': 'high', 'evidence_coverage': 100, 'opportunity_score': 100},
+          ]}
+
+          selected = select_candidate(products, report)
+          assert selected['product']['product_id'] == 'P011'
+          assert selected['selection']['decision'] == 'APPROVE'
+          assert selected['product']['product_id'] != 'P012'
+          assert selected['product']['product_id'] != 'P013'
+          print('Controlled ranking check: PASS (unused + approved beats higher-score review/hold/used)')
+          PY
