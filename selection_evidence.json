@@ -43,9 +43,25 @@
         "source": "Amazon.in listing screenshot supplied by user"
       },
       "review_themes": {
-        "score": null,
-        "confidence": "unknown",
-        "status": "not captured"
+        "score": 68,
+        "confidence": "medium",
+        "status": "captured",
+        "verified_on": "2026-08-31",
+        "review_sample_size": 8,
+        "source": "Product-specific review page for ASIN B0GL2ZFVR1; mirrored listing identifies the same AERYS Roman variant and ASIN",
+        "positive_themes": [
+          "vintage/antique aesthetic is repeatedly praised",
+          "stable stand and attractive appearance are positively mentioned",
+          "alarm function is reported as working well by multiple reviewers",
+          "some reviewers describe the quality/finish as good or premium",
+          "easy time/alarm setup is positively mentioned"
+        ],
+        "negative_themes": [
+          "one reviewer reports the clock stopped working after two weeks",
+          "one reviewer reports average build quality and scratched front glass on arrival"
+        ],
+        "interpretation": "Review evidence supports strong design appeal and acceptable everyday functionality, but also contains meaningful durability/quality complaints. The mixed evidence supports REVIEW rather than automatic APPROVE.",
+        "limitations": "The available review sample is small and not a complete statistical analysis of all reviews. Review counts and ratings are volatile and must not be treated as permanent facts."
       },
       "niche_fit": {
         "score": 90,
