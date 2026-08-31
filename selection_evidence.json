@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "products": {
+    "P004": {
+      "identity": {"confidence": "high", "verified_on": "2026-08-30"},
+      "demand": {"score": null, "confidence": "unknown", "status": "not captured"},
+      "review_volume": {"score": 70, "confidence": "medium", "value": 211, "verified_on": "2026-08-30"},
+      "rating_context": {"score": 70, "confidence": "medium", "rating": 4.6, "review_count": 211, "verified_on": "2026-08-30"},
+      "review_themes": {"score": null, "confidence": "unknown", "status": "not captured"},
+      "niche_fit": {"score": 90, "confidence": "high"},
+      "fact_verifiability": {"score": 95, "confidence": "high"},
+      "content_potential": {"score": 85, "confidence": "medium"}
+    },
+    "P005": {
+      "identity": {"confidence": "unknown", "status": "not verified"},
+      "demand": {"score": null, "confidence": "unknown", "status": "not captured"},
+      "review_volume": {"score": null, "confidence": "unknown", "status": "not captured"},
+      "rating_context": {"score": null, "confidence": "unknown", "status": "not captured"},
+      "review_themes": {"score": null, "confidence": "unknown", "status": "not captured"},
+      "niche_fit": {"score": 90, "confidence": "medium"},
+      "fact_verifiability": {"score": null, "confidence": "unknown", "status": "not captured"},
+      "content_potential": {"score": 70, "confidence": "low"}
+    }
+  }
+}
