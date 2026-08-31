@@ -43,10 +43,28 @@
         "source": "Amazon.in listing screenshot supplied by user"
       },
       "review_themes": {
-        "score": null,
-        "confidence": "unknown",
-        "status": "not captured",
-        "reason": "Previously collected review material could not be conclusively tied to ASIN B0GL2ZFVR1 at the variant/ASIN level. Do not use it as evidence for P005 until exact-product identity is independently verified."
+        "score": 70,
+        "confidence": "medium",
+        "status": "captured",
+        "verified_on": "2026-08-31",
+        "source": "Exact-ASIN product mirror with Amazon-linked listing and review excerpts",
+        "source_url": "https://www.desertcart.ae/products/801880667-aerys-vintage-style-alarm-clock-with-1-year-warranty-roman",
+        "asin_verified_on_source": "B0GL2ZFVR1",
+        "themes": {
+          "positive": [
+            "vintage/aesthetic appearance",
+            "stable stand",
+            "alarm function works",
+            "easy time/alarm setup",
+            "good perceived quality/value",
+            "low noise level"
+          ],
+          "negative": [
+            "one reviewer reported the clock stopped working after two weeks",
+            "one reviewer described build quality as average and reported scratched front glass"
+          ]
+        },
+        "reason": "The source explicitly identifies ASIN B0GL2ZFVR1 and presents multiple product-specific review excerpts. Evidence is mixed rather than uniformly positive, so the review-theme signal is scored conservatively at 70/100 with medium confidence."
       },
       "niche_fit": {
         "score": 90,
