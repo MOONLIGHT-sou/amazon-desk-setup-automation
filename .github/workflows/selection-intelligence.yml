@@ -37,14 +37,14 @@ jobs:
           assert results['P004']['confidence'] == 'medium'
           assert results['P004']['evidence_coverage'] == 65.0
 
-          # P005 now has verified identity, demand, rating context, review volume,
-          # niche fit, and verifiable facts. Review themes remain missing, so the
-          # selector may only recommend human review; it must not auto-approve.
+          # P005 now has exact-ASIN review-theme evidence in addition to its
+          # previously verified identity, demand, rating context, review volume,
+          # niche fit, and verifiable facts. The review evidence is mixed and
+          # conservatively scored, so P005 must remain REVIEW rather than APPROVE.
           assert results['P005']['decision'] == 'REVIEW'
           assert results['P005']['confidence'] == 'medium'
-          assert results['P005']['evidence_coverage'] == 85.0
-          assert results['P005']['opportunity_score'] == 73.8
-          assert any('Highest-value missing evidence: recurring review themes.' in r for r in results['P005']['reasons'])
+          assert results['P005']['evidence_coverage'] == 100.0
+          assert results['P005']['opportunity_score'] == 73.3
           assert results['P005']['decision'] != 'APPROVE'
 
           print('Selection intelligence safety checks: PASS')
