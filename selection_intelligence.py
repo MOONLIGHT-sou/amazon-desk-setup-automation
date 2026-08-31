@@ -1,3 +1,4 @@
+import csv
 import json
 import os
 
@@ -37,15 +38,15 @@ def normalize_confidence(value):
 
 def signal_value(signal):
     if not isinstance(signal, dict):
-        return 0, "unknown"
+        return 0, "unknown", False
     confidence = normalize_confidence(signal.get("confidence"))
     value = signal.get("score")
     if value is None:
-        return 0, confidence
+        return 0, confidence, False
     value = float(value)
     if not 0 <= value <= 100:
         raise RuntimeError("Signal scores must be between 0 and 100.")
-    return value, confidence
+    return value, confidence, True
 
 
 def evaluate(product_id, evidence):
@@ -74,19 +75,27 @@ def evaluate(product_id, evidence):
 
     weighted_score = 0.0
     available_weight = 0.0
-    confidences = []
+    available_confidences = []
 
     for name, weight in WEIGHTS.items():
-        value, confidence = signal_value(product.get(name))
-        if product.get(name, {}).get("score") is not None:
+        value, confidence, available = signal_value(product.get(name))
+        if available:
             weighted_score += value * weight / 100
             available_weight += weight
-        confidences.append(confidence)
+            available_confidences.append(confidence)
 
     opportunity_score = round((weighted_score / available_weight) * 100, 1) if available_weight else 0.0
     evidence_coverage = round((available_weight / sum(WEIGHTS.values())) * 100, 1)
 
-    min_confidence = min((CONFIDENCE_RANK[c] for c in confidences), default=0)
+    # Unknown signals do not poison the confidence of evidence that actually exists.
+    # Hard-gate unknowns still force HOLD and therefore remain visible in reasons.
+    gate_confidences = [
+        normalize_confidence(gate.get("confidence"))
+        for gate in (identity, niche, facts)
+        if normalize_confidence(gate.get("confidence")) != "unknown"
+    ]
+    confidence_inputs = available_confidences + gate_confidences
+    min_confidence = min((CONFIDENCE_RANK[c] for c in confidence_inputs), default=0)
     overall_confidence = next(name for name, rank in CONFIDENCE_RANK.items() if rank == min_confidence)
 
     if any("blocked" in reason for reason in reasons):
@@ -102,12 +111,14 @@ def evaluate(product_id, evidence):
 
     if evidence_coverage < 60:
         reasons.append("Evidence coverage is below the review threshold.")
-    if opportunity_score >= 80:
-        reasons.append("Opportunity score is strong.")
+    if opportunity_score >= 80 and evidence_coverage >= 60:
+        reasons.append("Available evidence scores strongly, but coverage still controls approval.")
     elif opportunity_score >= 65:
-        reasons.append("Opportunity score is promising but requires review.")
+        reasons.append("Available evidence is promising but requires review.")
+    elif available_weight:
+        reasons.append("Available evidence is not yet strong enough.")
     else:
-        reasons.append("Opportunity score is not yet strong enough.")
+        reasons.append("No scored evidence is available.")
 
     return {
         "product_id": product_id,
@@ -121,13 +132,9 @@ def evaluate(product_id, evidence):
 
 def build_report(products_path="products.csv", evidence_path=EVIDENCE_FILE):
     evidence = load_evidence(evidence_path)
-    product_ids = []
     with open(products_path, newline="", encoding="utf-8") as file:
-        import csv
         product_ids = [row["product_id"].strip() for row in csv.DictReader(file)]
-
-    results = [evaluate(product_id, evidence) for product_id in product_ids]
-    return {"schema_version": 1, "results": results}
+    return {"schema_version": 1, "results": [evaluate(product_id, evidence) for product_id in product_ids]}
 
 
 def main():
