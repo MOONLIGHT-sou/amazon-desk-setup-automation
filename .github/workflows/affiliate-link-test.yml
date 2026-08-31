@@ -1,0 +1,48 @@
+name: Affiliate Link Safety - Test
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'affiliate_link.py'
+      - 'test_affiliate_link.py'
+      - 'products.csv'
+      - '.github/workflows/affiliate-link-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify affiliate link safety
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+
+      - name: Run affiliate link regression
+        run: python test_affiliate_link.py
+
+      - name: Verify P005 link is the verified ASIN and Associate tag
+        run: |
+          python - <<'PY'
+          import csv
+          from affiliate_link import validate_affiliate_link
+
+          with open('products.csv', newline='', encoding='utf-8') as file:
+              rows = list(csv.DictReader(file))
+
+          p005 = next(row for row in rows if row['product_id'] == 'P005')
+          assert p005['used'] == 'No'
+          validate_affiliate_link(
+              p005['amazon_link'],
+              'B0GL2ZFVR1',
+              'moonlight0adc-21',
+          )
+          print('P005 affiliate-link verification: PASS')
+          PY
