@@ -40,7 +40,8 @@ jobs:
           assert selected['product']['product_id'] == 'P005'
           assert selected['selection']['decision'] == 'REVIEW'
           assert selected['selection']['confidence'] == 'medium'
-          assert selected['selection']['evidence_coverage'] == 85.0
+          assert selected['selection']['evidence_coverage'] == 100.0
+          assert selected['selection']['opportunity_score'] == 73.3
           print('Real-state selection check: PASS (P005 selected as the strongest eligible unused candidate)')
           PY
 
