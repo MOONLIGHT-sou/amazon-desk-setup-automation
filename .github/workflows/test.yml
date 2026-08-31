@@ -13,7 +13,6 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     env:
       TEST_MODE: "true"
       DRY_RUN: "true"
@@ -28,155 +27,135 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Identify current first-unused product
+      - name: Evaluate intelligent candidate
         shell: bash
         run: |
           set -euo pipefail
-
           python - <<'PY'
-          import csv
+          import json
+          from candidate_selector import select_candidate
+          from main import load_products
+          from selection_intelligence import build_report
 
-          with open("products.csv", newline="", encoding="utf-8") as file:
-              rows = list(csv.DictReader(file))
+          products = load_products()
+          report = build_report()
+          selection = select_candidate(products, report)
 
-          target = next((row for row in rows if row["used"].strip().lower() == "no"), None)
+          if selection is None:
+              print("TEST_MODE intelligent candidate: NONE — safe stop expected")
+              selected_id = ""
+          else:
+              product = selection["product"]
+              result = selection["selection"]
+              selected_id = product["product_id"]
+              print(
+                  f"TEST_MODE intelligent candidate: {selected_id} — {product['product_name']} "
+                  f"decision={result['decision']} score={result['opportunity_score']} "
+                  f"coverage={result['evidence_coverage']} confidence={result['confidence']}"
+              )
 
-          if target is None:
-              raise SystemExit("SAFETY STOP: no unused product exists for TEST_MODE.")
+          with open("/tmp/intelligent-target.txt", "w", encoding="utf-8") as file:
+              file.write(selected_id)
 
-          with open("/tmp/test-target.txt", "w", encoding="utf-8") as file:
-              file.write(target["product_id"])
-
-          print(f"TEST_MODE target: {target['product_id']} — {target['product_name']}")
-          print(f"TEST_MODE target protection: PASS ({target['product_id']} is No)")
+          with open("/tmp/selection-report.json", "w", encoding="utf-8") as file:
+              json.dump(report, file, indent=2)
           PY
 
       - name: Record pre-test repository state
         shell: bash
         run: |
           set -euo pipefail
-          git status --porcelain=v1
-          git ls-files -s > /tmp/tracked-before.txt
+          cp products.csv /tmp/products-before.csv
+          find content -type f -print | sort > /tmp/content-before.txt
           git status --porcelain=v1 > /tmp/status-before.txt
 
-      - name: Run automation in TEST_MODE
+      - name: Run automation in intelligent TEST_MODE
         run: python main.py
 
-      - name: Verify test output and quality gate
+      - name: Verify intelligent TEST_MODE result and quality gate
         shell: bash
         run: |
           set -euo pipefail
 
-          TARGET_ID="$(cat /tmp/test-target.txt)"
-          OUTPUT_FILE=".test-output/${TARGET_ID}/package.txt"
+          TARGET_ID="$(cat /tmp/intelligent-target.txt)"
 
-          test -f "$OUTPUT_FILE"
-          grep -F "$TARGET_ID" "$OUTPUT_FILE"
-          grep -F "Amazon Link:" "$OUTPUT_FILE"
-          grep -F "MEDIUM" "$OUTPUT_FILE"
-          grep -F "PINTEREST MAIN PIN" "$OUTPUT_FILE"
-          grep -F "PINTEREST PRODUCT PIN" "$OUTPUT_FILE"
-          grep -F "CONTENT QUALITY" "$OUTPUT_FILE"
-          grep -F "(paid link)" "$OUTPUT_FILE"
-          grep -F "As an Amazon Associate I earn from qualifying purchases." "$OUTPUT_FILE"
-          grep -F "Human review before publication: REQUIRED" "$OUTPUT_FILE"
-
-          python - <<'PY'
-          import csv
-          import os
-          from main import verify_content
-
-          target_id = open("/tmp/test-target.txt", encoding="utf-8").read().strip()
-
-          with open("products.csv", newline="", encoding="utf-8") as file:
-              rows = list(csv.DictReader(file))
-
-          target = next(row for row in rows if row["product_id"] == target_id)
-          content = open(
-              os.path.join(".test-output", target_id, "package.txt"),
-              encoding="utf-8",
-          ).read()
-
-          verify_content(content, target)
-          print("Independent TEST_MODE quality/compliance verification: PASS")
-          PY
-
-      - name: Verify selected product is still protected
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          TARGET_ID="$(cat /tmp/test-target.txt)"
-
-          python - <<'PY'
-          import csv
-
-          target_id = open("/tmp/test-target.txt", encoding="utf-8").read().strip()
-
-          with open("products.csv", newline="", encoding="utf-8") as file:
-              rows = list(csv.DictReader(file))
-
-          target = next((row for row in rows if row["product_id"] == target_id), None)
-
-          if target is None:
-              raise SystemExit("SAFETY FAILURE: selected product disappeared from products.csv.")
-
-          if target["used"].strip().lower() != "no":
-              raise SystemExit(
-                  f"SAFETY FAILURE: {target_id} changed to {target['used']!r} during TEST_MODE."
-              )
-
-          print(f"Selected product protection after test: PASS ({target_id} is still No)")
-          PY
-
-      - name: Verify no production files changed
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if ! git diff --quiet -- products.csv; then
-            echo "SAFETY FAILURE: products.csv was modified during TEST_MODE."
-            git diff -- products.csv
-            exit 1
-          fi
-
-          if git diff --quiet -- content; then
-            echo "Production content tree unchanged: PASS"
+          if [ -z "$TARGET_ID" ]; then
+            if [ -d .test-output ] && find .test-output -type f -print -quit | grep -q .; then
+              echo "SAFETY FAILURE: no eligible candidate was reported, but TEST_MODE generated output."
+              find .test-output -type f -print
+              exit 1
+            fi
+            echo "No eligible candidate: safe TEST_MODE stop verified."
           else
-            echo "SAFETY FAILURE: content/ changed during TEST_MODE."
-            git diff -- content
-            exit 1
+            OUTPUT_FILE=".test-output/${TARGET_ID}/package.txt"
+            test -f "$OUTPUT_FILE"
+            grep -F "$TARGET_ID" "$OUTPUT_FILE"
+            grep -F "Amazon Link:" "$OUTPUT_FILE"
+            grep -F "MEDIUM" "$OUTPUT_FILE"
+            grep -F "PINTEREST MAIN PIN" "$OUTPUT_FILE"
+            grep -F "PINTEREST PRODUCT PIN" "$OUTPUT_FILE"
+            grep -F "CONTENT QUALITY" "$OUTPUT_FILE"
+            grep -F "(paid link)" "$OUTPUT_FILE"
+            grep -F "As an Amazon Associate I earn from qualifying purchases." "$OUTPUT_FILE"
+            grep -F "Human review before publication: REQUIRED" "$OUTPUT_FILE"
+
+            python - <<'PY'
+            import csv
+            import os
+            from main import verify_content
+
+            target_id = open("/tmp/intelligent-target.txt", encoding="utf-8").read().strip()
+            with open("products.csv", newline="", encoding="utf-8") as file:
+                rows = list(csv.DictReader(file))
+            target = next(row for row in rows if row["product_id"] == target_id)
+            content = open(os.path.join(".test-output", target_id, "package.txt"), encoding="utf-8").read()
+            verify_content(content, target)
+            print("Independent TEST_MODE quality/compliance verification: PASS")
+            PY
           fi
 
-          if git diff --quiet -- main.py .github/workflows README.md; then
-            echo "Tracked production files unchanged: PASS"
-          else
-            echo "SAFETY FAILURE: tracked production files changed during TEST_MODE."
-            git diff -- main.py .github/workflows README.md
-            exit 1
-          fi
-
-      - name: Verify only test output was created
+      - name: Verify selected product and production state are protected
         shell: bash
         run: |
           set -euo pipefail
 
-          UNEXPECTED="$(git status --porcelain=v1 --untracked-files=all | awk '
-            !($0 ~ /^\?\? \.test-output\//) { print }
-          ')"
-
-          if [ -n "$UNEXPECTED" ]; then
-            echo "SAFETY FAILURE: unexpected repository changes detected:"
-            echo "$UNEXPECTED"
+          if ! cmp -s products.csv /tmp/products-before.csv; then
+            echo "SAFETY FAILURE: products.csv changed during TEST_MODE."
+            diff -u /tmp/products-before.csv products.csv || true
             exit 1
           fi
 
-          TARGET_ID="$(cat /tmp/test-target.txt)"
-          test -f ".test-output/${TARGET_ID}/package.txt"
-          echo "TEST_MODE filesystem isolation: PASS"
+          find content -type f -print | sort > /tmp/content-after.txt
+          if ! cmp -s /tmp/content-before.txt /tmp/content-after.txt; then
+            echo "SAFETY FAILURE: production content tree changed during TEST_MODE."
+            diff -u /tmp/content-before.txt /tmp/content-after.txt || true
+            exit 1
+          fi
+
+          if [ -n "$(git status --porcelain=v1 --untracked-files=all | awk '!($0 ~ /^\?\? \.test-output\//) {print}')" ]; then
+            echo "SAFETY FAILURE: unexpected repository changes detected."
+            git status --porcelain=v1 --untracked-files=all
+            exit 1
+          fi
+
+          TARGET_ID="$(cat /tmp/intelligent-target.txt)"
+          if [ -n "$TARGET_ID" ]; then
+            python - <<'PY'
+            import csv
+            target_id = open("/tmp/intelligent-target.txt", encoding="utf-8").read().strip()
+            with open("products.csv", newline="", encoding="utf-8") as file:
+                rows = list(csv.DictReader(file))
+            target = next(row for row in rows if row["product_id"] == target_id)
+            if target["used"].strip().lower() != "no":
+                raise SystemExit(f"SAFETY FAILURE: {target_id} changed to {target['used']!r} during TEST_MODE.")
+            print(f"Selected product protection after test: PASS ({target_id} is still No)")
+            PY
+          fi
+
+          echo "TEST_MODE intelligent selection safety: PASS"
 
       - name: Upload TEST_MODE output for human review
-        if: ${{ success() }}
+        if: ${{ success() && hashFiles('.test-output/**/package.txt') != '' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-output-${{ github.run_id }}-${{ github.run_attempt }}
