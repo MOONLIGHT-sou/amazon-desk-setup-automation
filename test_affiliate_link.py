@@ -20,11 +20,11 @@ else:
     raise AssertionError("Invalid Associate tag was accepted")
 
 try:
-    build_affiliate_link("https://www.amazon.in/dp/WRONG12345", TAG)
+    build_affiliate_link("https://www.amazon.in/dp/TOO-SHORT", TAG)
 except ValueError:
     pass
 else:
-    raise AssertionError("Invalid ASIN was accepted")
+    raise AssertionError("Malformed ASIN was accepted")
 
 try:
     build_affiliate_link("https://example.com/dp/B0GL2ZFVR1", TAG)
