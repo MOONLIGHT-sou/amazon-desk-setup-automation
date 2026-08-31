@@ -18,6 +18,27 @@ A product should not be promoted merely because it has a high star rating. Stron
 
 When purchase-volume information is unavailable, record it as **unknown**. Do not infer demand from price, search position, sponsored placement, or appearance.
 
+## Evidence + confidence model
+
+Selection Intelligence v1 separates evidence from interpretation. Every signal should record what was observed, when it was verified when applicable, and a confidence level: `high`, `medium`, `low`, or `unknown`.
+
+The system uses two layers:
+
+1. **Hard gates** — identity, niche fit, and fact verifiability. Unknown or blocked evidence prevents automatic approval.
+2. **Opportunity scoring** — demand, review volume, rating context, review themes, niche fit, fact verifiability, and content potential.
+
+Missing evidence is not a zero-quality claim and is never permission to guess. Low evidence coverage produces `HOLD` or `DEFER`, even when the available signals look attractive.
+
+Selection decisions are:
+
+- `APPROVE` — strong opportunity with sufficient evidence and confidence.
+- `REVIEW` — promising candidate requiring human review.
+- `HOLD` — insufficient evidence to make a responsible selection.
+- `DEFER` — evidence is adequate but opportunity is currently weak.
+- `REJECT` — a hard gate is blocked.
+
+The opportunity score is a prioritization tool, **not a claim that the product is objectively good**. The purpose is to decide whether the product deserves our limited content and review capacity.
+
 ## P004 record
 
 P004 is currently the verified example: the Amazon listing screenshot showed a **4.6 rating and 211 ratings/reviews** for the displayed Quntis Monitor Light Bar Focus variant. These figures are evidence captured at verification time, not permanent current values. The current price shown in the screenshot is deliberately not frozen as a content fact because Amazon prices change.
@@ -35,5 +56,6 @@ Capture and review, at minimum:
 - Key product facts that are safe to state
 - Facts that must not be claimed without re-checking
 - Verification date
+- Confidence for each evidence signal
 
 The automation must remain conservative: missing evidence is **unknown**, not permission to guess.
