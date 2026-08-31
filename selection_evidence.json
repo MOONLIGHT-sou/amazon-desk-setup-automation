@@ -12,14 +12,57 @@
       "content_potential": {"score": 85, "confidence": "medium"}
     },
     "P005": {
-      "identity": {"confidence": "unknown", "status": "not verified"},
-      "demand": {"score": null, "confidence": "unknown", "status": "not captured"},
-      "review_volume": {"score": null, "confidence": "unknown", "status": "not captured"},
-      "rating_context": {"score": null, "confidence": "unknown", "status": "not captured"},
-      "review_themes": {"score": null, "confidence": "unknown", "status": "not captured"},
-      "niche_fit": {"score": 90, "confidence": "medium"},
-      "fact_verifiability": {"score": null, "confidence": "unknown", "status": "not captured"},
-      "content_potential": {"score": 70, "confidence": "low"}
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B0GL2ZFVR1",
+        "variant": "Roman",
+        "verified_on": "2026-08-31",
+        "source": "Amazon.in listing screenshot supplied by user"
+      },
+      "demand": {
+        "score": 85,
+        "confidence": "medium",
+        "value": "400+ bought in past month",
+        "verified_on": "2026-08-31",
+        "source": "Amazon.in listing screenshot supplied by user"
+      },
+      "review_volume": {
+        "score": 50,
+        "confidence": "medium",
+        "value": 96,
+        "verified_on": "2026-08-31",
+        "source": "Amazon.in listing screenshot supplied by user"
+      },
+      "rating_context": {
+        "score": 65,
+        "confidence": "medium",
+        "rating": 4.4,
+        "review_count": 96,
+        "verified_on": "2026-08-31",
+        "source": "Amazon.in listing screenshot supplied by user"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 90,
+        "confidence": "high",
+        "reason": "Listing explicitly identifies use on study tables and office desks."
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high",
+        "verified_on": "2026-08-31",
+        "source": "Amazon.in listing screenshot supplied by user"
+      },
+      "content_potential": {
+        "score": 80,
+        "confidence": "medium",
+        "reason": "Clear desk-decor positioning and visible analog/Roman-numeral design."
+      }
     }
   }
 }
