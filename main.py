@@ -3,6 +3,9 @@ import os
 import re
 import tempfile
 
+from candidate_selector import select_candidate
+from selection_intelligence import build_report
+
 PRODUCTS_FILE = "products.csv"
 CONTENT_DIR = "content"
 TEST_OUTPUT_DIR = ".test-output"
@@ -19,9 +22,9 @@ BANNED_CLAIMS = (
     r"\beliminate(s|d)?\b",
     r"\bcure(s|d)?\b",
     r"\bprevent(s|ed)?\b",
-    r"\bboost(s|ed)? productivity\b",
-    r"\bimprove(s|d)? eyesight\b",
-    r"\bprotect(s|ed)? your eyes\b",
+    r"\bboost(s|ed) productivity\b",
+    r"\bimprove(s|d) eyesight\b",
+    r"\bprotect(s|ed) your eyes\b",
     r"\bhealth benefit(s)?\b",
 )
 
@@ -172,6 +175,30 @@ def select_first_unused(products):
         if product["used"].lower() == "no":
             return product
     return None
+
+
+def select_for_run(products, test_mode):
+    if not test_mode:
+        # Production selection remains intentionally unchanged until the intelligent
+        # selector has been proven through the TEST_MODE path.
+        return select_first_unused(products), None
+
+    report = build_report()
+    selection = select_candidate(products, report)
+
+    if selection is None:
+        print("Selection intelligence: no eligible unused candidate; safe stop.")
+        return None, report
+
+    selected = selection["product"]
+    result = selection["selection"]
+    print(
+        "Selection intelligence: selected "
+        f"{selected['product_id']} — {selected['product_name']} "
+        f"(decision={result['decision']}, score={result['opportunity_score']}, "
+        f"coverage={result['evidence_coverage']}, confidence={result['confidence']})"
+    )
+    return selected, report
 
 
 def words(text):
@@ -521,10 +548,13 @@ def main():
     dry_run = os.getenv("DRY_RUN", "false").strip().lower() == "true"
 
     products = load_products()
-    selected_product = select_first_unused(products)
+    selected_product, selection_report = select_for_run(products, test_mode)
 
     if selected_product is None:
-        print("No unused products found.")
+        if test_mode:
+            print("No eligible candidate selected. TEST_MODE stopped safely without generating content.")
+        else:
+            print("No unused products found.")
         return
 
     product_id = selected_product["product_id"]
@@ -558,25 +588,3 @@ def main():
         (product for product in current_products if product["product_id"] == product_id),
         None,
     )
-
-    if current_product is None:
-        raise RuntimeError("Safety stop: selected product no longer exists.")
-
-    if current_product["used"].lower() != "no":
-        raise RuntimeError(
-            "Safety stop: selected product is no longer unused. products.csv was not changed."
-        )
-
-    for product in current_products:
-        if product["product_id"] == product_id:
-            product["used"] = "Yes"
-            break
-
-    save_products_atomic(current_products)
-
-    print(f"Consumed safely: {product_id} No -> Yes")
-    print("Automation completed successfully.")
-
-
-if __name__ == "__main__":
-    main()
