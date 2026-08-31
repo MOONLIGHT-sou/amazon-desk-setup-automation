@@ -36,8 +36,12 @@ jobs:
               report = json.load(file)
 
           selected = select_candidate(products, report)
-          assert selected is None, 'No current unused product has passed the intelligence gates.'
-          print('Real-state selection check: PASS (P005 remains protected from selection)')
+          assert selected is not None, 'P005 should be selected because it is the only unused candidate that passed the intelligence gates.'
+          assert selected['product']['product_id'] == 'P005'
+          assert selected['selection']['decision'] == 'REVIEW'
+          assert selected['selection']['confidence'] == 'medium'
+          assert selected['selection']['evidence_coverage'] == 85.0
+          print('Real-state selection check: PASS (P005 selected as the strongest eligible unused candidate)')
           PY
 
       - name: Verify ranking logic with controlled candidates
