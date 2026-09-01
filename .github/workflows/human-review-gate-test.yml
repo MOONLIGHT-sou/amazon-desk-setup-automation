@@ -1,0 +1,52 @@
+name: Human Review Gate - Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: Verify fail-closed human review gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Verify pending review blocks production
+        run: |
+          python - <<'PY'
+          import json
+
+          state = json.load(open('review_state.json', encoding='utf-8'))
+          p005 = state['products']['P005']
+
+          assert p005['status'] == 'PENDING_HUMAN_REVIEW'
+          assert p005['draft_qc'] == 'PASSED'
+          assert p005['selection'] == 'REVIEW'
+          assert p005['human_review'] == 'REQUIRED'
+          assert p005['approved_for_production'] is False
+
+          print('PENDING_HUMAN_REVIEW state: PASS')
+          print('Production approval: BLOCKED')
+          PY
+
+      - name: Verify approval cannot be inferred from draft QC
+        run: |
+          python - <<'PY'
+          import json
+          state = json.load(open('review_state.json', encoding='utf-8'))
+          p005 = state['products']['P005']
+
+          assert p005['draft_qc'] == 'PASSED'
+          assert p005['status'] != 'APPROVED'
+          assert p005['approved_for_production'] is False
+
+          print('QC does not imply human approval: PASS')
+          PY
