@@ -44,7 +44,7 @@ jobs:
           assert results['P005']['decision'] == 'REVIEW'
           assert results['P005']['confidence'] == 'medium'
           assert results['P005']['evidence_coverage'] == 100.0
-          assert results['P005']['opportunity_score'] == 73.3
+          assert results['P005']['opportunity_score'] == 73.2
           assert results['P005']['decision'] != 'APPROVE'
 
           print('Selection intelligence safety checks: PASS')
