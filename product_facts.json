@@ -24,6 +24,31 @@
         "Guaranteed eye-fatigue reduction"
       ],
       "editorial_note": "Use the Amazon listing as the source of truth for current price, availability, specifications, compatibility, and variant details. Do not infer facts from another Quntis variant."
+    },
+    "P005": {
+      "product_name": "AERYS Vintage Style Alarm Clock",
+      "variant": "Roman",
+      "asin": "B0GL2ZFVR1",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B0GL2ZFVR1?tag=moonlight0adc-21",
+      "verified_on": "2026-08-31",
+      "verification_method": "Exact ASIN and product identity verified from Amazon.in listing screenshot supplied by user; review evidence separately recorded in selection_evidence.json.",
+      "safe_facts": [
+        "AERYS Vintage Style Alarm Clock",
+        "Roman variant",
+        "Analog alarm clock",
+        "Roman-numeral design",
+        "Desk/study-table use"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Exact dimensions unless re-checked on the current listing",
+        "Battery life unless re-checked on the current listing",
+        "Guaranteed durability",
+        "Guaranteed silent operation"
+      ],
+      "editorial_note": "Use the verified Amazon.in listing as the source of truth for current price, availability, specifications, dimensions, power requirements, and variant details. Do not infer facts from another AERYS ASIN or variant. Product-specific review themes are evidence only and are not guarantees."
     }
   }
 }
