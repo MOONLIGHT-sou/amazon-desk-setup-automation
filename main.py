@@ -22,7 +22,7 @@ BANNED_CLAIMS = (
     r"\beliminate(s|d)?\b",
     r"\bcure(s|d)?\b",
     r"\bprevent(s|ed)?\b",
-    r"\bboost(s|ed) productivity\b",
+    r"\bboost(s|ed productivity\b",
     r"\bimprove(s|d) eyesight\b",
     r"\bprotect(s|ed) your eyes\b",
     r"\bhealth benefit(s)?\b",
@@ -588,3 +588,7 @@ def main():
         (product for product in current_products if product["product_id"] == product_id),
         None,
     )
+
+
+if __name__ == "__main__":
+    main()
