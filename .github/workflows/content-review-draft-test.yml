@@ -2,6 +2,15 @@ name: Content Review - Draft Test
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "main.py"
+      - "product_facts.json"
+      - "products.csv"
+      - "selection_evidence.json"
+      - "candidate_selector.py"
+      - "selection_intelligence.py"
+      - ".github/workflows/content-review-draft-test.yml"
 
 permissions:
   contents: read
@@ -35,7 +44,6 @@ jobs:
           python - <<'PY'
           import csv
           import json
-          import os
           from candidate_selector import select_candidate
           from selection_intelligence import build_report
 
