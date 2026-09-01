@@ -1,0 +1,111 @@
+name: Content Review - Draft Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  draft:
+    name: Generate and verify P005 draft without production mutation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Snapshot repository state
+        run: |
+          cp products.csv /tmp/products.before.csv
+          git rev-parse HEAD > /tmp/revision.before
+
+      - name: Run content generation in TEST_MODE
+        env:
+          TEST_MODE: "true"
+          DRY_RUN: "false"
+        run: python main.py
+
+      - name: Verify intelligent selection and draft identity
+        run: |
+          python - <<'PY'
+          import csv
+          import json
+          import os
+          from candidate_selector import select_candidate
+          from selection_intelligence import build_report
+
+          with open('products.csv', newline='', encoding='utf-8') as file:
+              products = list(csv.DictReader(file))
+
+          report = build_report()
+          selected = select_candidate(products, report)
+
+          assert selected is not None, 'No eligible candidate was selected.'
+          assert selected['product']['product_id'] == 'P005'
+          assert selected['selection']['decision'] == 'REVIEW'
+          assert selected['selection']['confidence'] == 'medium'
+          assert selected['selection']['evidence_coverage'] == 100.0
+          assert selected['selection']['opportunity_score'] == 73.2
+
+          facts = json.load(open('product_facts.json', encoding='utf-8'))['facts']['P005']
+          assert facts['asin'] == 'B0GL2ZFVR1'
+          assert facts['variant'] == 'Roman'
+
+          print('Draft target verification: PASS (P005 / REVIEW / medium / 100.0% / 73.2)')
+          PY
+
+      - name: Verify generated draft package
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('.test-output/P005/package.txt')
+          assert path.is_file(), 'Expected TEST_MODE draft package was not created.'
+          content = path.read_text(encoding='utf-8')
+
+          required = [
+              'PRODUCT CONTENT PACKAGE',
+              'Product ID: P005',
+              'AERYS Vintage Style Alarm Clock',
+              'Roman',
+              'https://www.amazon.in/dp/B0GL2ZFVR1?tag=moonlight0adc-21',
+              'MEDIUM',
+              'PINTEREST MAIN PIN',
+              'PINTEREST PRODUCT PIN',
+              'CONTENT QUALITY',
+              'Human review before publication: REQUIRED',
+              'As an Amazon Associate I earn from qualifying purchases.',
+              '(paid link)',
+          ]
+
+          for item in required:
+              assert item in content, f'Missing required draft content: {item!r}'
+
+          assert 'Editorial status: This package is generated from structured product data and requires human review before publication.' in content
+          assert 'TODO' not in content
+          assert 'PLACEHOLDER' not in content
+
+          print('Draft package verification: PASS')
+          PY
+
+      - name: Verify TEST_MODE did not mutate production state
+        run: |
+          cmp --silent products.csv /tmp/products.before.csv || {
+            echo 'SAFETY FAILURE: TEST_MODE changed products.csv.'
+            exit 1
+          }
+
+          if git diff --quiet -- products.csv; then
+            echo 'Production database mutation check: PASS'
+          else
+            echo 'SAFETY FAILURE: products.csv differs after draft test.'
+            git diff -- products.csv
+            exit 1
+          fi
+
+          echo 'Draft test is non-production: PASS'
