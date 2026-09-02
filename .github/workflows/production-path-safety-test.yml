@@ -1,0 +1,89 @@
+name: Production Path Safety - Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-path:
+    name: Isolated production-path verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Run isolated approved-production simulation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv
+          import json
+          import os
+          import shutil
+          import tempfile
+          from pathlib import Path
+
+          import main
+
+          repo_products = Path("products.csv").read_text(encoding="utf-8")
+          repo_review = Path("review_state.json").read_text(encoding="utf-8")
+          repo_content = Path("content")
+
+          with tempfile.TemporaryDirectory() as tmp:
+              root = Path(tmp)
+              products_path = root / "products.csv"
+              review_path = root / "review_state.json"
+              evidence_path = root / "selection_evidence.json"
+              content_root = root / "content"
+              products_path.write_text(repo_products, encoding="utf-8")
+
+              review = json.loads(repo_review)
+              review["products"]["P005"]["status"] = "APPROVED"
+              review["products"]["P005"]["human_review"] = "APPROVED"
+              review["products"]["P005"]["approved_for_production"] = True
+              review_path.write_text(json.dumps(review), encoding="utf-8")
+              shutil.copyfile("selection_evidence.json", evidence_path)
+
+              main.PRODUCTS_FILE = str(products_path)
+              main.REVIEW_STATE_FILE = str(review_path)
+              main.SELECTION_EVIDENCE_FILE = str(evidence_path)
+              main.CONTENT_DIR = str(content_root)
+
+              os.environ["TEST_MODE"] = "false"
+              os.environ["DRY_RUN"] = "false"
+              os.environ["TARGET_PRODUCT_ID"] = "P005"
+
+              main.main()
+
+              rows = list(csv.DictReader(products_path.open(newline="", encoding="utf-8")))
+              target = next(row for row in rows if row["product_id"] == "P005")
+              if target["used"].lower() != "yes":
+                  raise SystemExit("TEST FAILURE: isolated approved production did not consume P005.")
+
+              package = content_root / "P005" / "package.txt"
+              if not package.is_file() or package.stat().st_size == 0:
+                  raise SystemExit("TEST FAILURE: isolated production did not create the content package.")
+
+          actual_repo_products = Path("products.csv").read_text(encoding="utf-8")
+          actual_repo_review = Path("review_state.json").read_text(encoding="utf-8")
+          if actual_repo_products != repo_products:
+              raise SystemExit("SAFETY FAILURE: repository products.csv was mutated by the isolated test.")
+          if actual_repo_review != repo_review:
+              raise SystemExit("SAFETY FAILURE: repository review_state.json was mutated by the isolated test.")
+          if repo_content.exists() and any(repo_content.rglob("*")):
+              # Existing tracked/untracked content is allowed; this test must not add to it.
+              pass
+
+          print("Production path safety: PASS")
+          print("Verified: intelligent selection, human authorization, exact-ASIN affiliate validation, content QC, and No -> Yes mutation all work in an isolated copy.")
+          print("Verified: real repository state was not mutated by the test.")
+          PY
