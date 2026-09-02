@@ -37,15 +37,22 @@ jobs:
           assert results['P004']['confidence'] == 'medium'
           assert results['P004']['evidence_coverage'] == 65.0
 
-          # P005 now has exact-ASIN review-theme evidence in addition to its
-          # previously verified identity, demand, rating context, review volume,
-          # niche fit, and verifiable facts. The review evidence is mixed and
-          # conservatively scored, so P005 must remain REVIEW rather than APPROVE.
+          # P005 remains a completed historical candidate and its evidence
+          # must continue to evaluate conservatively as REVIEW.
           assert results['P005']['decision'] == 'REVIEW'
           assert results['P005']['confidence'] == 'medium'
           assert results['P005']['evidence_coverage'] == 100.0
           assert results['P005']['opportunity_score'] == 73.2
           assert results['P005']['decision'] != 'APPROVE'
+
+          # P006 is the newly introduced unused candidate. Its evidence is
+          # strong enough for REVIEW, but coverage is only 65%, so the system
+          # must not auto-approve it.
+          assert results['P006']['decision'] == 'REVIEW'
+          assert results['P006']['confidence'] == 'medium'
+          assert results['P006']['evidence_coverage'] == 65.0
+          assert results['P006']['opportunity_score'] == 84.0
+          assert results['P006']['decision'] != 'APPROVE'
 
           print('Selection intelligence safety checks: PASS')
           PY
