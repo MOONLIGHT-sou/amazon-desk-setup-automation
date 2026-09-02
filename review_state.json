@@ -2,11 +2,11 @@
   "version": 1,
   "products": {
     "P005": {
-      "status": "PENDING_HUMAN_REVIEW",
+      "status": "APPROVED",
       "draft_qc": "PASSED",
       "selection": "REVIEW",
-      "human_review": "REQUIRED",
-      "approved_for_production": false
+      "human_review": "APPROVED",
+      "approved_for_production": true
     }
   }
 }
