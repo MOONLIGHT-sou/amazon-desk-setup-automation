@@ -6,7 +6,7 @@ on:
       target_product_id:
         description: "Product ID expected to be consumed; must be the current first-unused product"
         required: true
-        default: "P004"
+        default: "P005"
         type: string
 
 permissions:
@@ -219,7 +219,7 @@ jobs:
         run: |
           set -euo pipefail
           CONTENT_FILE="content/${TARGET_PRODUCT_ID}/package.txt"
-          UNEXPECTED="$(git status --porcelain=v1 --untracked-files=all | awk -v expected="$CONTENT_FILE" '!($0 ~ /^ M products\.csv$/ || $0 ~ ("^\\?\\? " expected "$")) { print }')"
+          UNEXPECTED="$(git status --porcelain=v1 --untracked-files=all | awk -v expected="$CONTENT_FILE" '!($0 ~ /^ M products\.csv$/ || $0 ~ ("^\\?\? " expected "$")) { print }')"
           if [ -n "$UNEXPECTED" ]; then
             echo "SAFETY FAILURE: unexpected repository changes detected:"
             echo "$UNEXPECTED"
