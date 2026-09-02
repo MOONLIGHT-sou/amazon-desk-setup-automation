@@ -2,6 +2,17 @@ name: Production Path Safety - Test
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'main.py'
+      - 'products.csv'
+      - 'review_state.json'
+      - 'selection_evidence.json'
+      - 'product_facts.json'
+      - 'candidate_selector.py'
+      - 'selection_intelligence.py'
+      - '.github/workflows/production.yml'
+      - '.github/workflows/production-path-safety-test.yml'
 
 permissions:
   contents: read
@@ -79,6 +90,7 @@ jobs:
               review["products"][target_id]["status"] = "APPROVED"
               review["products"][target_id]["human_review"] = "APPROVED"
               review["products"][target_id]["approved_for_production"] = True
+              review["products"][target_id]["draft_qc"] = "PASSED"
               review_path.write_text(json.dumps(review), encoding="utf-8")
               shutil.copyfile(repo_root / "selection_evidence.json", evidence_path)
               shutil.copyfile(repo_root / "product_facts.json", facts_path)
@@ -128,13 +140,7 @@ jobs:
 
               package_text = package.read_text(encoding="utf-8")
               facts = json.load(open(facts_path, encoding="utf-8"))["facts"][target_id]
-              required = (
-                  target_id,
-                  facts["product_name"],
-                  facts["asin"],
-                  facts["amazon_link"],
-                  "As an Amazon Associate I earn from qualifying purchases.",
-              )
+              required = (target_id, facts["product_name"], facts["asin"], facts["amazon_link"], "As an Amazon Associate I earn from qualifying purchases.")
               for value in required:
                   if value not in package_text:
                       raise SystemExit(f"TEST FAILURE: isolated package missing {value!r}.")
