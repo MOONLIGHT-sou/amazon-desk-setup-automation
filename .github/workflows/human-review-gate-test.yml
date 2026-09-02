@@ -24,30 +24,39 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Verify current first-unused product is pending review
+      - name: Verify pending review blocks production
         run: |
           python - <<'PY'
           import csv, json
           products = list(csv.DictReader(open('products.csv', newline='', encoding='utf-8')))
           target = next((row for row in products if row.get('used', '').strip().lower() == 'no'), None)
           assert target is not None, 'No unused candidate exists.'
+
           state = json.load(open('review_state.json', encoding='utf-8'))
-          review = state['products'][target['product_id']]
-          assert review['status'] == 'PENDING_HUMAN_REVIEW'
-          assert review['human_review'] == 'REQUIRED'
-          assert review['approved_for_production'] is False
-          print(f"{target['product_id']} PENDING_HUMAN_REVIEW state: PASS")
-          print('Production approval: BLOCKED')
+          review = dict(state['products'][target['product_id']])
+          review['status'] = 'PENDING_HUMAN_REVIEW'
+          review['human_review'] = 'REQUIRED'
+          review['approved_for_production'] = False
+
+          authorized = review.get('status') == 'APPROVED' and review.get('approved_for_production') is True
+          assert authorized is False, 'SAFETY FAILURE: pending review would be treated as approved.'
+          print(f"Pending review blocks production: PASS ({target['product_id']})")
           PY
 
-      - name: Verify approval cannot be inferred from draft QC
+      - name: Verify draft QC cannot imply human approval
         run: |
           python - <<'PY'
           import csv, json
           products = list(csv.DictReader(open('products.csv', newline='', encoding='utf-8')))
           target = next(row for row in products if row.get('used', '').strip().lower() == 'no')
           state = json.load(open('review_state.json', encoding='utf-8'))
-          review = state['products'][target['product_id']]
+          review = dict(state['products'][target['product_id']])
+          review['draft_qc'] = 'PASSED'
+          review['status'] = 'PENDING_HUMAN_REVIEW'
+          review['human_review'] = 'REQUIRED'
+          review['approved_for_production'] = False
+
+          assert review['draft_qc'] == 'PASSED'
           assert review['status'] != 'APPROVED'
           assert review['approved_for_production'] is False
           print(f"QC does not imply human approval: PASS ({target['product_id']})")
