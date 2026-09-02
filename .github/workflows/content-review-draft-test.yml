@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   draft:
-    name: Generate and verify P005 draft without production mutation
+    name: Generate and verify P006 draft without production mutation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -42,8 +42,7 @@ jobs:
       - name: Verify intelligent selection and draft identity
         run: |
           python - <<'PY'
-          import csv
-          import json
+          import csv, json
           from candidate_selector import select_candidate
           from selection_intelligence import build_report
 
@@ -54,17 +53,17 @@ jobs:
           selected = select_candidate(products, report)
 
           assert selected is not None, 'No eligible candidate was selected.'
-          assert selected['product']['product_id'] == 'P005'
+          assert selected['product']['product_id'] == 'P006'
           assert selected['selection']['decision'] == 'REVIEW'
           assert selected['selection']['confidence'] == 'medium'
-          assert selected['selection']['evidence_coverage'] == 100.0
-          assert selected['selection']['opportunity_score'] == 73.2
+          assert selected['selection']['evidence_coverage'] == 65.0
+          assert selected['selection']['opportunity_score'] == 84.0
 
-          facts = json.load(open('product_facts.json', encoding='utf-8'))['facts']['P005']
-          assert facts['asin'] == 'B0GL2ZFVR1'
-          assert facts['variant'] == 'Roman'
+          facts = json.load(open('product_facts.json', encoding='utf-8'))['facts']['P006']
+          assert facts['asin'] == 'B0D7J2KTH2'
+          assert facts['variant'] == 'White Clock, 14 x 8 cm'
 
-          print('Draft target verification: PASS (P005 / REVIEW / medium / 100.0% / 73.2)')
+          print('Draft target verification: PASS (P006 / REVIEW / medium / 65.0% / 84.0)')
           PY
 
       - name: Verify generated draft package
@@ -72,16 +71,16 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          path = Path('.test-output/P005/package.txt')
+          path = Path('.test-output/P006/package.txt')
           assert path.is_file(), 'Expected TEST_MODE draft package was not created.'
           content = path.read_text(encoding='utf-8')
 
           required = [
               'PRODUCT CONTENT PACKAGE',
-              'Product ID: P005',
-              'AERYS Vintage Style Alarm Clock',
-              'Roman',
-              'https://www.amazon.in/dp/B0GL2ZFVR1?tag=moonlight0adc-21',
+              'Product ID: P006',
+              'JASIFS Alarm Clock Digital Plastic Clock Table Clock',
+              'White Clock',
+              'https://www.amazon.in/dp/B0D7J2KTH2?tag=moonlight0adc-21',
               'MEDIUM',
               'PINTEREST MAIN PIN',
               'PINTEREST PRODUCT PIN',
