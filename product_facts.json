@@ -78,6 +78,38 @@
         "Health or productivity benefits"
       ],
       "editorial_note": "Use the Amazon.in listing as the source of truth for current price, availability, specifications, dimensions, power requirements, and variant details. Do not infer facts from another JASIFS ASIN or variant."
+    },
+    "P007": {
+      "product_name": "Zebronics ZEB-NC3300 USB Powered Laptop Cooling Pad with Dual Fan, Dual USB Port and Blue LED Lights",
+      "variant": "ZEB-NC3300, Black",
+      "asin": "B07YWS9SP9",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B07YWS9SP9?tag=moonlight0adc-21",
+      "verified_on": "2026-09-02",
+      "verification_method": "Current Amazon.in listing page with exact ASIN, product title, model, dimensions, rating/review count and product-detail fields.",
+      "safe_facts": [
+        "Zebronics ZEB-NC3300 USB powered laptop cooling pad",
+        "ZEB-NC3300 model",
+        "Black variant",
+        "Dual 120 mm fans",
+        "Dual USB ports",
+        "Blue LED lights",
+        "Retractable stand",
+        "Silent-operation claim stated on the listing",
+        "36.8 x 26 x 2.7 cm listed dimensions",
+        "624 g listed weight",
+        "1-year carry-in service-center warranty stated on the listing"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Guaranteed cooling performance",
+        "Guaranteed noise level",
+        "Universal laptop compatibility",
+        "Guaranteed thermal reduction",
+        "Gaming performance improvement"
+      ],
+      "editorial_note": "Use the Amazon.in listing as the source of truth for current price, availability, specifications and compatibility. Review summaries are evidence, not guarantees."
     }
   }
 }
