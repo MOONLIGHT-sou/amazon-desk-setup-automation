@@ -42,6 +42,10 @@ jobs:
                       digest.update(chunk)
               return digest.hexdigest()
 
+          def read_rows(path):
+              with path.open(newline="", encoding="utf-8") as file:
+                  return list(csv.DictReader(file))
+
           repo_products = Path("products.csv").read_bytes()
           repo_review = Path("review_state.json").read_bytes()
           repo_content_files = {
@@ -58,6 +62,16 @@ jobs:
               content_root = root / "content"
 
               products_path.write_bytes(repo_products)
+              before_rows = read_rows(products_path)
+              before_target = next((row for row in before_rows if row.get("product_id") == "P005"), None)
+              if before_target is None:
+                  raise SystemExit("TEST FAILURE: isolated fixture is missing P005.")
+              if before_target.get("used", "").strip().lower() != "no":
+                  raise SystemExit(
+                      "TEST FAILURE: isolated fixture P005 was not initially unused "
+                      f"(observed used={before_target.get('used')!r})."
+                  )
+              before_products_by_id = {row["product_id"]: dict(row) for row in before_rows}
 
               review = json.loads(repo_review.decode("utf-8"))
               review["products"]["P005"]["status"] = "APPROVED"
@@ -77,18 +91,35 @@ jobs:
 
               main.main()
 
-              with products_path.open(newline="", encoding="utf-8") as file:
-                  rows = list(csv.DictReader(file))
-              target = next((row for row in rows if row["product_id"] == "P005"), None)
-              if target is None:
+              after_rows = read_rows(products_path)
+              after_target = next((row for row in after_rows if row.get("product_id") == "P005"), None)
+              if after_target is None:
                   raise SystemExit("TEST FAILURE: isolated production removed P005.")
-
-              print(f"Isolated post-run state: P005 used={target['used']!r}")
-              if target["used"].strip().lower() != "yes":
+              if after_target.get("product_id") != "P005":
+                  raise SystemExit("TEST FAILURE: isolated production returned the wrong target identity.")
+              if after_target.get("used", "").strip().lower() != "yes":
                   raise SystemExit(
                       "TEST FAILURE: isolated approved production did not consume P005 "
-                      f"(observed used={target['used']!r})."
+                      f"(observed used={after_target.get('used')!r})."
                   )
+
+              after_products_by_id = {row["product_id"]: dict(row) for row in after_rows}
+              if set(after_products_by_id) != set(before_products_by_id):
+                  raise SystemExit("SAFETY FAILURE: isolated production changed the product set.")
+              for product_id, before_row in before_products_by_id.items():
+                  after_row = after_products_by_id[product_id]
+                  if product_id == "P005":
+                      expected = dict(before_row)
+                      expected["used"] = "Yes"
+                      if after_row != expected:
+                          raise SystemExit(
+                              "SAFETY FAILURE: P005 mutation was not exactly No -> Yes "
+                              f"(before={before_row!r}, after={after_row!r})."
+                          )
+                  elif after_row != before_row:
+                      raise SystemExit(
+                          f"SAFETY FAILURE: product {product_id} changed during isolated production."
+                      )
 
               package = content_root / "P005" / "package.txt"
               if not package.is_file() or package.stat().st_size == 0:
@@ -119,6 +150,7 @@ jobs:
               raise SystemExit("SAFETY FAILURE: real repository content was mutated by the isolated test.")
 
           print("Production path safety: PASS")
-          print("Verified: intelligent selection, human authorization, exact-ASIN affiliate validation, content QC, and No -> Yes mutation all work in an isolated copy.")
+          print("Verified: intelligent selection, human authorization, exact-ASIN affiliate validation, content QC, and exact isolated P005 No -> Yes mutation all work.")
+          print("Verified: all other isolated product rows remain unchanged.")
           print("Verified: real products.csv, review_state.json, and content files were not mutated by the test.")
           PY
