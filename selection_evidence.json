@@ -12,117 +12,34 @@
       "content_potential": {"score": 85, "confidence": "medium"}
     },
     "P005": {
-      "identity": {
-        "confidence": "high",
-        "status": "verified",
-        "asin": "B0GL2ZFVR1",
-        "variant": "Roman",
-        "verified_on": "2026-08-31",
-        "source": "Amazon.in listing screenshot supplied by user"
-      },
-      "demand": {
-        "score": 85,
-        "confidence": "medium",
-        "value": "400+ bought in past month",
-        "verified_on": "2026-08-31",
-        "source": "Amazon.in listing screenshot supplied by user"
-      },
-      "review_volume": {
-        "score": 50,
-        "confidence": "medium",
-        "value": 96,
-        "verified_on": "2026-08-31",
-        "source": "Amazon.in listing screenshot supplied by user"
-      },
-      "rating_context": {
-        "score": 65,
-        "confidence": "medium",
-        "rating": 4.4,
-        "review_count": 96,
-        "verified_on": "2026-08-31",
-        "source": "Amazon.in listing screenshot supplied by user"
-      },
-      "review_themes": {
-        "score": 70,
-        "confidence": "medium",
-        "status": "captured",
-        "verified_on": "2026-08-31",
-        "source": "Exact-ASIN product mirror with Amazon-linked listing and review excerpts",
-        "source_url": "https://www.desertcart.ae/products/801880667-aerys-vintage-style-alarm-clock-with-1-year-warranty-roman",
-        "asin_verified_on_source": "B0GL2ZFVR1",
-        "themes": {
-          "positive": ["vintage/aesthetic appearance", "stable stand", "alarm function works", "easy time/alarm setup", "good perceived quality/value", "low noise level"],
-          "negative": ["one reviewer reported the clock stopped working after two weeks", "one reviewer described build quality as average and reported scratched front glass"]
-        },
-        "reason": "The source explicitly identifies ASIN B0GL2ZFVR1 and presents multiple product-specific review excerpts. Evidence is mixed rather than uniformly positive, so the review-theme signal is scored conservatively at 70/100 with medium confidence."
-      },
-      "niche_fit": {
-        "score": 90,
-        "confidence": "high",
-        "reason": "Listing explicitly identifies use on study tables and office desks."
-      },
-      "fact_verifiability": {
-        "score": 90,
-        "confidence": "high",
-        "verified_on": "2026-08-31",
-        "source": "Amazon.in listing screenshot supplied by user"
-      },
-      "content_potential": {
-        "score": 80,
-        "confidence": "medium",
-        "reason": "Clear desk-decor positioning and visible analog/Roman-numeral design."
-      }
+      "identity": {"confidence": "high", "status": "verified", "asin": "B0GL2ZFVR1", "variant": "Roman", "verified_on": "2026-08-31", "source": "Amazon.in listing screenshot supplied by user"},
+      "demand": {"score": 85, "confidence": "medium", "value": "400+ bought in past month", "verified_on": "2026-08-31", "source": "Amazon.in listing screenshot supplied by user"},
+      "review_volume": {"score": 50, "confidence": "medium", "value": 96, "verified_on": "2026-08-31", "source": "Amazon.in listing screenshot supplied by user"},
+      "rating_context": {"score": 65, "confidence": "medium", "rating": 4.4, "review_count": 96, "verified_on": "2026-08-31", "source": "Amazon.in listing screenshot supplied by user"},
+      "review_themes": {"score": 70, "confidence": "medium", "status": "captured", "verified_on": "2026-08-31", "source": "Exact-ASIN product mirror with Amazon-linked listing and review excerpts", "source_url": "https://www.desertcart.ae/products/801880667-aerys-vintage-style-alarm-clock-with-1-year-warranty-roman", "asin_verified_on_source": "B0GL2ZFVR1", "themes": {"positive": ["vintage/aesthetic appearance", "stable stand", "alarm function works", "easy time/alarm setup", "good perceived quality/value", "low noise level"], "negative": ["one reviewer reported the clock stopped working after two weeks", "one reviewer described build quality as average and reported scratched front glass"]}, "reason": "The source explicitly identifies ASIN B0GL2ZFVR1 and presents multiple product-specific review excerpts. Evidence is mixed rather than uniformly positive, so the review-theme signal is scored conservatively at 70/100 with medium confidence."},
+      "niche_fit": {"score": 90, "confidence": "high", "reason": "Listing explicitly identifies use on study tables and office desks."},
+      "fact_verifiability": {"score": 90, "confidence": "high", "verified_on": "2026-08-31", "source": "Amazon.in listing screenshot supplied by user"},
+      "content_potential": {"score": 80, "confidence": "medium", "reason": "Clear desk-decor positioning and visible analog/Roman-numeral design."}
     },
     "P006": {
-      "identity": {
-        "confidence": "high",
-        "status": "verified",
-        "asin": "B0D7J2KTH2",
-        "variant": "White Clock, 14 x 8 cm",
-        "verified_on": "2026-09-02",
-        "source": "Amazon.in product tracking record"
-      },
-      "demand": {
-        "score": null,
-        "confidence": "unknown",
-        "status": "not captured"
-      },
-      "review_volume": {
-        "score": 80,
-        "confidence": "high",
-        "value": 418,
-        "verified_on": "2026-09-02",
-        "source": "PriceHistory Amazon.in product record"
-      },
-      "rating_context": {
-        "score": 74,
-        "confidence": "high",
-        "rating": 3.7,
-        "review_count": 418,
-        "verified_on": "2026-09-02",
-        "source": "PriceHistory Amazon.in product record"
-      },
-      "review_themes": {
-        "score": null,
-        "confidence": "unknown",
-        "status": "not captured"
-      },
-      "niche_fit": {
-        "score": 95,
-        "confidence": "high",
-        "reason": "The Amazon.in product title explicitly positions the item as a table/desk alarm clock for students, study, home office and bedroom use."
-      },
-      "fact_verifiability": {
-        "score": 95,
-        "confidence": "high",
-        "verified_on": "2026-09-02",
-        "source": "Amazon.in product tracking record; model details and dimensions cross-checked in the same record"
-      },
-      "content_potential": {
-        "score": 85,
-        "confidence": "medium",
-        "reason": "The product combines desk-clock utility with date, temperature and automatic night-sensor features, giving the content system a concrete desk-use angle without requiring unsupported claims."
-      }
+      "identity": {"confidence": "high", "status": "verified", "asin": "B0D7J2KTH2", "variant": "White Clock, 14 x 8 cm", "verified_on": "2026-09-02", "source": "Amazon.in product tracking record"},
+      "demand": {"score": null, "confidence": "unknown", "status": "not captured"},
+      "review_volume": {"score": 80, "confidence": "high", "value": 418, "verified_on": "2026-09-02", "source": "PriceHistory Amazon.in product record"},
+      "rating_context": {"score": 74, "confidence": "high", "rating": 3.7, "review_count": 418, "verified_on": "2026-09-02", "source": "PriceHistory Amazon.in product record"},
+      "review_themes": {"score": null, "confidence": "unknown", "status": "not captured"},
+      "niche_fit": {"score": 95, "confidence": "high", "reason": "The Amazon.in product title explicitly positions the item as a table/desk alarm clock for students, study, home office and bedroom use."},
+      "fact_verifiability": {"score": 95, "confidence": "high", "verified_on": "2026-09-02", "source": "Amazon.in product tracking record; model details and dimensions cross-checked in the same record"},
+      "content_potential": {"score": 85, "confidence": "medium", "reason": "The product combines desk-clock utility with date, temperature and automatic night-sensor features, giving the content system a concrete desk-use angle without requiring unsupported claims."}
+    },
+    "P007": {
+      "identity": {"confidence": "high", "status": "verified", "asin": "B07YWS9SP9", "variant": "ZEB-NC3300, Black", "verified_on": "2026-09-02", "source": "Current Amazon.in listing"},
+      "demand": {"score": null, "confidence": "unknown", "status": "not captured"},
+      "review_volume": {"score": 95, "confidence": "high", "value": 12180, "verified_on": "2026-09-02", "source": "Amazon.in listing"},
+      "rating_context": {"score": 78, "confidence": "high", "rating": 3.9, "review_count": 12180, "verified_on": "2026-09-02", "source": "Amazon.in listing"},
+      "review_themes": {"score": 80, "confidence": "high", "status": "captured", "verified_on": "2026-09-02", "source": "Amazon.in customer review summary and India review excerpts", "themes": {"positive": ["silent operation praised by some customers", "useful incline/stand", "dual fans and blue LEDs appreciated", "value at budget pricing mentioned positively"], "negative": ["mixed cooling performance", "some customers report weak fan speed", "some reports of build-quality or leg durability issues", "some users report limited suitability for larger 15.6-inch laptops"]}, "reason": "The Amazon.in listing provides a large review sample and mixed customer themes. The evidence is explicitly treated as mixed rather than as a guarantee of performance."},
+      "niche_fit": {"score": 85, "confidence": "high", "reason": "A laptop cooling pad with a retractable stand is directly relevant to a laptop-centered desk setup and ergonomic workspace positioning."},
+      "fact_verifiability": {"score": 95, "confidence": "high", "verified_on": "2026-09-02", "source": "Current Amazon.in listing with exact ASIN and product-detail fields"},
+      "content_potential": {"score": 85, "confidence": "medium", "reason": "The product has concrete desk-use features—dual fans, retractable stand, USB ports and LEDs—while its mixed reviews create room for honest buyer-focused content."}
     }
   }
 }
