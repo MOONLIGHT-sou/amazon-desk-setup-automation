@@ -2,6 +2,11 @@ name: Human Review Gate - Test
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'review_state.json'
+      - 'products.csv'
+      - '.github/workflows/human-review-gate-test.yml'
 
 permissions:
   contents: read
@@ -23,14 +28,11 @@ jobs:
         run: |
           python - <<'PY'
           import csv, json
-
           products = list(csv.DictReader(open('products.csv', newline='', encoding='utf-8')))
           target = next((row for row in products if row.get('used', '').strip().lower() == 'no'), None)
           assert target is not None, 'No unused candidate exists.'
-
           state = json.load(open('review_state.json', encoding='utf-8'))
           review = state['products'][target['product_id']]
-
           assert review['status'] == 'PENDING_HUMAN_REVIEW'
           assert review['human_review'] == 'REQUIRED'
           assert review['approved_for_production'] is False
@@ -46,7 +48,6 @@ jobs:
           target = next(row for row in products if row.get('used', '').strip().lower() == 'no')
           state = json.load(open('review_state.json', encoding='utf-8'))
           review = state['products'][target['product_id']]
-
           assert review['status'] != 'APPROVED'
           assert review['approved_for_production'] is False
           print(f"QC does not imply human approval: PASS ({target['product_id']})")
