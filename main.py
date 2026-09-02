@@ -1,14 +1,19 @@
 import csv
+import json
 import os
 import re
 import tempfile
 
+from affiliate_link import validate_affiliate_link
 from candidate_selector import select_candidate
 from selection_intelligence import build_report
 
 PRODUCTS_FILE = "products.csv"
 CONTENT_DIR = "content"
 TEST_OUTPUT_DIR = ".test-output"
+REVIEW_STATE_FILE = "review_state.json"
+SELECTION_EVIDENCE_FILE = "selection_evidence.json"
+AMAZON_ASSOCIATE_TAG = "moonlight0adc-21"
 
 REQUIRED_COLUMNS = {"product_id", "product_name", "category", "amazon_link", "used"}
 MIN_MEDIUM_WORDS = 320
@@ -170,19 +175,7 @@ def load_products(path=PRODUCTS_FILE):
     return products
 
 
-def select_first_unused(products):
-    for product in products:
-        if product["used"].lower() == "no":
-            return product
-    return None
-
-
 def select_for_run(products, test_mode):
-    if not test_mode:
-        # Production selection remains intentionally unchanged until the intelligent
-        # selector has been proven through the TEST_MODE path.
-        return select_first_unused(products), None
-
     report = build_report()
     selection = select_candidate(products, report)
 
@@ -199,6 +192,40 @@ def select_for_run(products, test_mode):
         f"coverage={result['evidence_coverage']}, confidence={result['confidence']})"
     )
     return selected, report
+
+
+def load_review_authorization(product_id):
+    try:
+        with open(REVIEW_STATE_FILE, encoding="utf-8") as file:
+            state = json.load(file)
+        review = state["products"][product_id]
+    except (OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"SAFETY STOP: review authorization is unavailable or invalid: {exc}") from exc
+
+    if review.get("status") != "APPROVED":
+        raise RuntimeError(
+            "SAFETY STOP: human review has not approved this product. "
+            f"status={review.get('status')!r}"
+        )
+    if review.get("approved_for_production") is not True:
+        raise RuntimeError("SAFETY STOP: approved_for_production is not true.")
+    if review.get("draft_qc") != "PASSED":
+        raise RuntimeError("SAFETY STOP: draft QC is not PASSED.")
+
+    return review
+
+
+def load_verified_asin(product_id):
+    try:
+        with open(SELECTION_EVIDENCE_FILE, encoding="utf-8") as file:
+            evidence = json.load(file)
+        asin = evidence["products"][product_id]["identity"]["asin"]
+    except (OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"SAFETY STOP: verified ASIN evidence is unavailable: {exc}") from exc
+
+    if not re.fullmatch(r"[A-Z0-9]{10}", str(asin).upper()):
+        raise RuntimeError(f"SAFETY STOP: invalid verified ASIN for {product_id}.")
+    return str(asin).upper()
 
 
 def words(text):
@@ -501,8 +528,12 @@ def generate_and_verify(product, output_root, write_output=True):
 
     output_dir = os.path.join(output_root, product["product_id"])
     os.makedirs(output_dir, exist_ok=True)
-
     content_file = os.path.join(output_dir, "package.txt")
+
+    if os.path.exists(content_file):
+        raise RuntimeError(
+            f"SAFETY STOP: production content already exists for {product['product_id']}; refusing to overwrite it."
+        )
 
     with open(content_file, "w", encoding="utf-8") as file:
         file.write(content)
@@ -543,22 +574,61 @@ def save_products_atomic(products, path=PRODUCTS_FILE):
             os.remove(temporary_path)
 
 
+def mark_product_used(products, product_id):
+    matches = [product for product in products if product["product_id"] == product_id]
+    if len(matches) != 1:
+        raise RuntimeError(f"SAFETY STOP: expected exactly one target product, found {len(matches)}.")
+
+    target = matches[0]
+    if target["used"].lower() != "no":
+        raise RuntimeError(
+            f"SAFETY STOP: target {product_id} is no longer unused ({target['used']!r})."
+        )
+    target["used"] = "Yes"
+
+
 def main():
     test_mode = os.getenv("TEST_MODE", "false").strip().lower() == "true"
     dry_run = os.getenv("DRY_RUN", "false").strip().lower() == "true"
+    target_product_id = os.getenv("TARGET_PRODUCT_ID", "").strip()
 
     products = load_products()
     selected_product, selection_report = select_for_run(products, test_mode)
 
     if selected_product is None:
-        if test_mode:
-            print("No eligible candidate selected. TEST_MODE stopped safely without generating content.")
-        else:
-            print("No unused products found.")
+        print("No eligible candidate selected. Safe stop.")
         return
 
     product_id = selected_product["product_id"]
     product_name = selected_product["product_name"]
+
+    if not test_mode and not target_product_id:
+        raise RuntimeError("SAFETY STOP: TARGET_PRODUCT_ID is required for production execution.")
+
+    if not test_mode and product_id != target_product_id:
+        raise RuntimeError(
+            "SAFETY STOP: intelligent selector target does not match the explicitly authorized production target. "
+            f"selected={product_id}, authorized={target_product_id}"
+        )
+
+    if not test_mode:
+        load_review_authorization(product_id)
+
+        expected_asin = load_verified_asin(product_id)
+        try:
+            validate_affiliate_link(
+                selected_product["amazon_link"],
+                expected_asin,
+                AMAZON_ASSOCIATE_TAG,
+            )
+        except ValueError as exc:
+            raise RuntimeError(
+                f"SAFETY STOP: affiliate link validation failed for {product_id}: {exc}"
+            ) from exc
+        print(f"Affiliate link validation: PASS ({product_id}, ASIN={expected_asin})")
+
+        if selected_product["used"].lower() != "no":
+            raise RuntimeError(f"SAFETY STOP: production target {product_id} is not unused.")
 
     output_root = TEST_OUTPUT_DIR if test_mode else CONTENT_DIR
     write_output = test_mode or not dry_run
@@ -588,6 +658,20 @@ def main():
         (product for product in current_products if product["product_id"] == product_id),
         None,
     )
+    if current_product is None:
+        raise RuntimeError(f"SAFETY STOP: target {product_id} disappeared before mutation.")
+    if current_product["used"].lower() != "no":
+        raise RuntimeError(
+            f"SAFETY STOP: target {product_id} changed before mutation ({current_product['used']!r})."
+        )
+    if current_product["amazon_link"] != selected_product["amazon_link"]:
+        raise RuntimeError("SAFETY STOP: target Amazon link changed during production execution.")
+
+    # Re-check authorization immediately before the only database mutation.
+    load_review_authorization(product_id)
+    mark_product_used(current_products, product_id)
+    save_products_atomic(current_products)
+    print(f"Production state mutation: PASS ({product_id} No -> Yes)")
 
 
 if __name__ == "__main__":
