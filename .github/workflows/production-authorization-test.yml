@@ -1,0 +1,47 @@
+name: Production Authorization - Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  authorization:
+    name: Verify production fails closed without approval
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Verify current P005 state is not production-authorized
+        run: |
+          python - <<'PY'
+          import json
+          state = json.load(open('review_state.json', encoding='utf-8'))
+          p005 = state['products']['P005']
+          assert p005['status'] == 'PENDING_HUMAN_REVIEW'
+          assert p005['approved_for_production'] is False
+          print('Current P005 authorization state: BLOCKED as expected')
+          PY
+
+      - name: Simulate production authorization decision
+        run: |
+          python - <<'PY'
+          import json
+          state = json.load(open('review_state.json', encoding='utf-8'))
+          review = state['products']['P005']
+          authorized = review.get('status') == 'APPROVED' and review.get('approved_for_production') is True
+          assert authorized is False, 'SAFETY FAILURE: unapproved product would be authorized.'
+          print('Fail-closed authorization decision: PASS')
+          PY
+
+      - name: Verify no production mutation occurred
+        run: |
+          git diff --exit-code -- products.csv
+          echo 'Production database mutation: NONE'
