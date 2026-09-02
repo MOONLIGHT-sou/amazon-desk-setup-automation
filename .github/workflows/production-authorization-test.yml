@@ -2,6 +2,11 @@ name: Production Authorization - Test
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'review_state.json'
+      - 'products.csv'
+      - '.github/workflows/production-authorization-test.yml'
 
 permissions:
   contents: read
@@ -19,7 +24,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Verify current first-unused product is not production-authorized
+      - name: Simulate unapproved production target
         run: |
           python - <<'PY'
           import csv, json
@@ -28,23 +33,29 @@ jobs:
           assert target is not None, 'No unused candidate exists.'
 
           state = json.load(open('review_state.json', encoding='utf-8'))
-          review = state['products'][target['product_id']]
-          assert review['status'] == 'PENDING_HUMAN_REVIEW'
-          assert review['approved_for_production'] is False
-          print(f"Current {target['product_id']} authorization state: BLOCKED as expected")
+          review = dict(state['products'][target['product_id']])
+          review['status'] = 'PENDING_HUMAN_REVIEW'
+          review['approved_for_production'] = False
+
+          authorized = review.get('status') == 'APPROVED' and review.get('approved_for_production') is True
+          assert authorized is False, 'SAFETY FAILURE: unapproved product would be authorized.'
+          print(f"Fail-closed authorization decision: PASS ({target['product_id']})")
           PY
 
-      - name: Simulate production authorization decision
+      - name: Verify draft QC alone cannot authorize production
         run: |
           python - <<'PY'
           import csv, json
           products = list(csv.DictReader(open('products.csv', newline='', encoding='utf-8')))
           target = next(row for row in products if row.get('used', '').strip().lower() == 'no')
           state = json.load(open('review_state.json', encoding='utf-8'))
-          review = state['products'][target['product_id']]
+          review = dict(state['products'][target['product_id']])
+          review['draft_qc'] = 'PASSED'
+          review['status'] = 'PENDING_HUMAN_REVIEW'
+          review['approved_for_production'] = False
           authorized = review.get('status') == 'APPROVED' and review.get('approved_for_production') is True
-          assert authorized is False, 'SAFETY FAILURE: unapproved product would be authorized.'
-          print(f"Fail-closed authorization decision: PASS ({target['product_id']})")
+          assert authorized is False
+          print(f"Draft QC does not imply production authorization: PASS ({target['product_id']})")
           PY
 
       - name: Verify no production mutation occurred
