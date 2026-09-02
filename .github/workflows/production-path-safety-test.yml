@@ -26,6 +26,7 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import csv
+          import hashlib
           import json
           import os
           import shutil
@@ -34,9 +35,20 @@ jobs:
 
           import main
 
-          repo_products = Path("products.csv").read_text(encoding="utf-8")
-          repo_review = Path("review_state.json").read_text(encoding="utf-8")
-          repo_content = Path("content")
+          def file_hash(path):
+              digest = hashlib.sha256()
+              with open(path, "rb") as file:
+                  for chunk in iter(lambda: file.read(65536), b""):
+                      digest.update(chunk)
+              return digest.hexdigest()
+
+          repo_products = Path("products.csv").read_bytes()
+          repo_review = Path("review_state.json").read_bytes()
+          repo_content_files = {
+              str(path.relative_to("content")): file_hash(path)
+              for path in Path("content").rglob("*")
+              if path.is_file()
+          } if Path("content").exists() else {}
 
           with tempfile.TemporaryDirectory() as tmp:
               root = Path(tmp)
@@ -44,9 +56,10 @@ jobs:
               review_path = root / "review_state.json"
               evidence_path = root / "selection_evidence.json"
               content_root = root / "content"
-              products_path.write_text(repo_products, encoding="utf-8")
 
-              review = json.loads(repo_review)
+              products_path.write_bytes(repo_products)
+
+              review = json.loads(repo_review.decode("utf-8"))
               review["products"]["P005"]["status"] = "APPROVED"
               review["products"]["P005"]["human_review"] = "APPROVED"
               review["products"]["P005"]["approved_for_production"] = True
@@ -64,26 +77,48 @@ jobs:
 
               main.main()
 
-              rows = list(csv.DictReader(products_path.open(newline="", encoding="utf-8")))
-              target = next(row for row in rows if row["product_id"] == "P005")
-              if target["used"].lower() != "yes":
-                  raise SystemExit("TEST FAILURE: isolated approved production did not consume P005.")
+              with products_path.open(newline="", encoding="utf-8") as file:
+                  rows = list(csv.DictReader(file))
+              target = next((row for row in rows if row["product_id"] == "P005"), None)
+              if target is None:
+                  raise SystemExit("TEST FAILURE: isolated production removed P005.")
+
+              print(f"Isolated post-run state: P005 used={target['used']!r}")
+              if target["used"].strip().lower() != "yes":
+                  raise SystemExit(
+                      "TEST FAILURE: isolated approved production did not consume P005 "
+                      f"(observed used={target['used']!r})."
+                  )
 
               package = content_root / "P005" / "package.txt"
               if not package.is_file() or package.stat().st_size == 0:
                   raise SystemExit("TEST FAILURE: isolated production did not create the content package.")
 
-          actual_repo_products = Path("products.csv").read_text(encoding="utf-8")
-          actual_repo_review = Path("review_state.json").read_text(encoding="utf-8")
-          if actual_repo_products != repo_products:
+              package_text = package.read_text(encoding="utf-8")
+              required = (
+                  "P005",
+                  "AERYS Vintage Style Alarm Clock",
+                  "https://www.amazon.in/dp/B0GL2ZFVR1?tag=moonlight0adc-21",
+                  "As an Amazon Associate I earn from qualifying purchases.",
+              )
+              for value in required:
+                  if value not in package_text:
+                      raise SystemExit(f"TEST FAILURE: isolated package missing {value!r}.")
+
+          if Path("products.csv").read_bytes() != repo_products:
               raise SystemExit("SAFETY FAILURE: repository products.csv was mutated by the isolated test.")
-          if actual_repo_review != repo_review:
+          if Path("review_state.json").read_bytes() != repo_review:
               raise SystemExit("SAFETY FAILURE: repository review_state.json was mutated by the isolated test.")
-          if repo_content.exists() and any(repo_content.rglob("*")):
-              # Existing tracked/untracked content is allowed; this test must not add to it.
-              pass
+
+          current_content_files = {
+              str(path.relative_to("content")): file_hash(path)
+              for path in Path("content").rglob("*")
+              if path.is_file()
+          } if Path("content").exists() else {}
+          if current_content_files != repo_content_files:
+              raise SystemExit("SAFETY FAILURE: real repository content was mutated by the isolated test.")
 
           print("Production path safety: PASS")
           print("Verified: intelligent selection, human authorization, exact-ASIN affiliate validation, content QC, and No -> Yes mutation all work in an isolated copy.")
-          print("Verified: real repository state was not mutated by the test.")
+          print("Verified: real products.csv, review_state.json, and content files were not mutated by the test.")
           PY
