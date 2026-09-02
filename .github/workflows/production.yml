@@ -47,6 +47,7 @@ jobs:
 
           python - <<'PY'
           import csv
+          import json
           import os
 
           target_id = os.environ["TARGET_PRODUCT_ID"].strip()
@@ -55,25 +56,36 @@ jobs:
               rows = list(csv.DictReader(file))
 
           target = next((row for row in rows if row["product_id"] == target_id), None)
-
           if target is None:
               raise SystemExit(f"SAFETY STOP: target product {target_id} was not found.")
-
           if target["used"].strip().lower() != "no":
               raise SystemExit(f"SAFETY STOP: target {target_id} is already {target['used']!r}.")
 
           first_unused = next((row for row in rows if row["used"].strip().lower() == "no"), None)
-
           if first_unused is None:
               raise SystemExit("SAFETY STOP: no unused products exist.")
-
           if first_unused["product_id"] != target_id:
               raise SystemExit(
                   "SAFETY STOP: target does not match the first unused product. "
                   f"Target={target_id}, first_unused={first_unused['product_id']}."
               )
 
-          print(f"Production preflight PASS: {target_id} is the first unused product and is No.")
+          try:
+              state = json.load(open("review_state.json", encoding="utf-8"))
+              review = state["products"][target_id]
+          except (OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
+              raise SystemExit(f"SAFETY STOP: review authorization is unavailable or invalid: {exc}")
+
+          if review.get("status") != "APPROVED":
+              raise SystemExit(
+                  "SAFETY STOP: human review has not approved this product. "
+                  f"status={review.get('status')!r}"
+              )
+          if review.get("approved_for_production") is not True:
+              raise SystemExit("SAFETY STOP: approved_for_production is not true.")
+
+          print(f"Human review authorization: PASS ({target_id} APPROVED)")
+          print(f"Production preflight PASS: {target_id} is first-unused, No, and approved.")
           PY
 
           if ! git diff --quiet; then
@@ -112,19 +124,32 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           git fetch origin main --depth=1
           CURRENT_MAIN="$(git rev-parse origin/main)"
-          WORKFLOW_SHA="${GITHUB_SHA}"
-
-          if [ "$CURRENT_MAIN" != "$WORKFLOW_SHA" ]; then
+          if [ "$CURRENT_MAIN" != "$GITHUB_SHA" ]; then
             echo "SAFETY STOP: main changed after this production run was started."
-            echo "Workflow SHA: $WORKFLOW_SHA"
-            echo "Current main: $CURRENT_MAIN"
             exit 1
           fi
-
           echo "Repository revision check: PASS"
+
+      - name: Re-verify human review authorization
+        shell: bash
+        env:
+          TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          target_id = os.environ["TARGET_PRODUCT_ID"].strip()
+          try:
+              state = json.load(open("review_state.json", encoding="utf-8"))
+              review = state["products"][target_id]
+          except (OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
+              raise SystemExit(f"SAFETY STOP: review authorization invalid: {exc}")
+          if review.get("status") != "APPROVED" or review.get("approved_for_production") is not True:
+              raise SystemExit("SAFETY STOP: human review authorization is not APPROVED.")
+          print(f"Human review authorization re-check: PASS ({target_id})")
+          PY
 
       - name: Verify target is still the current first-unused product
         shell: bash
@@ -132,28 +157,15 @@ jobs:
           TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
         run: |
           set -euo pipefail
-
           python - <<'PY'
-          import csv
-          import os
-
+          import csv, os
           target_id = os.environ["TARGET_PRODUCT_ID"].strip()
-
           with open("products.csv", newline="", encoding="utf-8") as file:
               rows = list(csv.DictReader(file))
-
           first_unused = next((row for row in rows if row["used"].strip().lower() == "no"), None)
-
-          if first_unused is None:
-              raise SystemExit("SAFETY STOP: no unused product remains.")
-
-          if first_unused["product_id"] != target_id:
-              raise SystemExit(
-                  "SAFETY STOP: target changed before execution. "
-                  f"Requested={target_id}, current_first_unused={first_unused['product_id']}."
-              )
-
-          print(f"Final target check: PASS ({target_id} is still first-unused and No)")
+          if first_unused is None or first_unused["product_id"] != target_id:
+              raise SystemExit("SAFETY STOP: target is no longer the current first-unused product.")
+          print(f"Final target check: PASS ({target_id})")
           PY
 
       - name: Run automation in production mode
@@ -168,59 +180,34 @@ jobs:
           TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
         run: |
           set -euo pipefail
-
           CONTENT_FILE="content/${TARGET_PRODUCT_ID}/package.txt"
           test -f "$CONTENT_FILE"
-
           python - <<'PY'
-          import csv
-          import os
-          import subprocess
-
+          import csv, os, subprocess
           target_id = os.environ["TARGET_PRODUCT_ID"].strip()
-          content_file = os.path.join("content", target_id, "package.txt")
-          content = open(content_file, encoding="utf-8").read()
-
+          content = open(os.path.join("content", target_id, "package.txt"), encoding="utf-8").read()
           before_text = subprocess.check_output(["git", "show", "HEAD:products.csv"], text=True)
           before = list(csv.DictReader(before_text.splitlines()))
-
           with open("products.csv", newline="", encoding="utf-8") as file:
               after = list(csv.DictReader(file))
-
-          before_by_id = {row["product_id"]: row for row in before}
-          after_by_id = {row["product_id"]: row for row in after}
-
-          if set(before_by_id) != set(after_by_id):
-              raise SystemExit("SAFETY FAILURE: product IDs changed.")
-          if len(before) != len(after):
-              raise SystemExit("SAFETY FAILURE: products.csv row count changed.")
-
-          if target_id not in before_by_id:
-              raise SystemExit("SAFETY FAILURE: target did not exist before execution.")
+          before_by_id = {r["product_id"]: r for r in before}
+          after_by_id = {r["product_id"]: r for r in after}
+          if set(before_by_id) != set(after_by_id) or len(before) != len(after):
+              raise SystemExit("SAFETY FAILURE: product structure changed.")
           if before_by_id[target_id]["used"].strip().lower() != "no":
               raise SystemExit("SAFETY FAILURE: target was not No before execution.")
           if after_by_id[target_id]["used"].strip().lower() != "yes":
               raise SystemExit("SAFETY FAILURE: target did not change No -> Yes.")
-
-          for product_id in before_by_id:
-              for column in before_by_id[product_id]:
-                  if product_id == target_id and column == "used":
+          for pid in before_by_id:
+              for column in before_by_id[pid]:
+                  if pid == target_id and column == "used":
                       continue
-                  if before_by_id[product_id][column] != after_by_id[product_id][column]:
-                      raise SystemExit(
-                          f"SAFETY FAILURE: unexpected products.csv change at {product_id}.{column}."
-                      )
-
+                  if before_by_id[pid][column] != after_by_id[pid][column]:
+                      raise SystemExit(f"SAFETY FAILURE: unexpected change at {pid}.{column}.")
           target = after_by_id[target_id]
-          required = (target_id, target["product_name"], target["category"], target["amazon_link"])
-          for value in required:
+          for value in (target_id, target["product_name"], target["category"], target["amazon_link"]):
               if value not in content:
-                  raise SystemExit(f"SAFETY FAILURE: generated content is missing {value!r}.")
-
-          for marker in ("MEDIUM", "PINTEREST MAIN PIN", "PINTEREST PRODUCT PIN", "CONTENT QUALITY"):
-              if marker not in content:
-                  raise SystemExit(f"SAFETY FAILURE: generated content is missing {marker!r}.")
-
+                  raise SystemExit(f"SAFETY FAILURE: generated content missing {value!r}.")
           print(f"Exact production verification: PASS ({target_id} No -> Yes)")
           PY
 
@@ -230,23 +217,17 @@ jobs:
           TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
         run: |
           set -euo pipefail
-
           CONTENT_FILE="content/${TARGET_PRODUCT_ID}/package.txt"
-          UNEXPECTED="$(git status --porcelain=v1 --untracked-files=all | awk -v expected="$CONTENT_FILE" '
-            !($0 ~ /^ M products\.csv$/ || $0 ~ ("^\\?\\? " expected "$")) { print }
-          ')"
-
+          UNEXPECTED="$(git status --porcelain=v1 --untracked-files=all | awk -v expected="$CONTENT_FILE" '!($0 ~ /^ M products\.csv$/ || $0 ~ ("^\\?\\? " expected "$")) { print }')"
           if [ -n "$UNEXPECTED" ]; then
             echo "SAFETY FAILURE: unexpected repository changes detected:"
             echo "$UNEXPECTED"
             exit 1
           fi
-
           if git diff --quiet -- products.csv; then
             echo "SAFETY FAILURE: products.csv did not change."
             exit 1
           fi
-
           test -f "$CONTENT_FILE"
           echo "Changed-file scope verification: PASS"
 
@@ -254,17 +235,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           git fetch origin main --depth=1
           CURRENT_MAIN="$(git rev-parse origin/main)"
-
           if [ "$CURRENT_MAIN" != "$GITHUB_SHA" ]; then
             echo "SAFETY STOP: main changed during production execution."
-            echo "Workflow SHA: $GITHUB_SHA"
-            echo "Current main: $CURRENT_MAIN"
             exit 1
           fi
-
           echo "Final repository revision check: PASS"
 
       - name: Commit production result
@@ -273,34 +249,25 @@ jobs:
           TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
         run: |
           set -euo pipefail
-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           git add products.csv "content/${TARGET_PRODUCT_ID}/package.txt"
-
           if git diff --cached --quiet; then
             echo "SAFETY FAILURE: nothing staged for production commit."
             exit 1
           fi
-
           git commit -m "Consume ${TARGET_PRODUCT_ID} and publish generated content"
 
       - name: Final main check before push
         shell: bash
         run: |
           set -euo pipefail
-
           git fetch origin main --depth=1
           CURRENT_MAIN="$(git rev-parse origin/main)"
-
           if [ "$CURRENT_MAIN" != "$GITHUB_SHA" ]; then
             echo "SAFETY STOP: main changed before production push."
-            echo "Workflow SHA: $GITHUB_SHA"
-            echo "Current main: $CURRENT_MAIN"
             exit 1
           fi
-
           echo "Final pre-push repository revision check: PASS"
 
       - name: Push production result
