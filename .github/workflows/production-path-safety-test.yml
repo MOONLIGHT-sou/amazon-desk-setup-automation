@@ -46,13 +46,14 @@ jobs:
               with path.open(newline="", encoding="utf-8") as file:
                   return list(csv.DictReader(file))
 
-          repo_products = Path("products.csv").read_bytes()
-          repo_review = Path("review_state.json").read_bytes()
+          repo_root = Path.cwd()
+          repo_products = (repo_root / "products.csv").read_bytes()
+          repo_review = (repo_root / "review_state.json").read_bytes()
           repo_content_files = {
-              str(path.relative_to("content")): file_hash(path)
-              for path in Path("content").rglob("*")
+              str(path.relative_to(repo_root / "content")): file_hash(path)
+              for path in (repo_root / "content").rglob("*")
               if path.is_file()
-          } if Path("content").exists() else {}
+          } if (repo_root / "content").exists() else {}
 
           with tempfile.TemporaryDirectory() as tmp:
               root = Path(tmp)
@@ -78,18 +79,22 @@ jobs:
               review["products"]["P005"]["human_review"] = "APPROVED"
               review["products"]["P005"]["approved_for_production"] = True
               review_path.write_text(json.dumps(review), encoding="utf-8")
-              shutil.copyfile("selection_evidence.json", evidence_path)
-
-              main.PRODUCTS_FILE = str(products_path)
-              main.REVIEW_STATE_FILE = str(review_path)
-              main.SELECTION_EVIDENCE_FILE = str(evidence_path)
-              main.CONTENT_DIR = str(content_root)
+              shutil.copyfile(repo_root / "selection_evidence.json", evidence_path)
 
               os.environ["TEST_MODE"] = "false"
               os.environ["DRY_RUN"] = "false"
               os.environ["TARGET_PRODUCT_ID"] = "P005"
 
-              main.main()
+              # The production code intentionally uses repository-relative paths.
+              # Isolate the complete filesystem view by changing into the temp repo,
+              # rather than monkey-patching module globals that are also used as
+              # default arguments. This exercises the real production path exactly.
+              previous_cwd = Path.cwd()
+              try:
+                  os.chdir(root)
+                  main.main()
+              finally:
+                  os.chdir(previous_cwd)
 
               after_rows = read_rows(products_path)
               after_target = next((row for row in after_rows if row.get("product_id") == "P005"), None)
@@ -136,21 +141,21 @@ jobs:
                   if value not in package_text:
                       raise SystemExit(f"TEST FAILURE: isolated package missing {value!r}.")
 
-          if Path("products.csv").read_bytes() != repo_products:
+          if (repo_root / "products.csv").read_bytes() != repo_products:
               raise SystemExit("SAFETY FAILURE: repository products.csv was mutated by the isolated test.")
-          if Path("review_state.json").read_bytes() != repo_review:
+          if (repo_root / "review_state.json").read_bytes() != repo_review:
               raise SystemExit("SAFETY FAILURE: repository review_state.json was mutated by the isolated test.")
 
           current_content_files = {
-              str(path.relative_to("content")): file_hash(path)
-              for path in Path("content").rglob("*")
+              str(path.relative_to(repo_root / "content")): file_hash(path)
+              for path in (repo_root / "content").rglob("*")
               if path.is_file()
-          } if Path("content").exists() else {}
+          } if (repo_root / "content").exists() else {}
           if current_content_files != repo_content_files:
               raise SystemExit("SAFETY FAILURE: real repository content was mutated by the isolated test.")
 
           print("Production path safety: PASS")
           print("Verified: intelligent selection, human authorization, exact-ASIN affiliate validation, content QC, and exact isolated P005 No -> Yes mutation all work.")
           print("Verified: all other isolated product rows remain unchanged.")
-          print("Verified: real products.csv, review_state.json, and content files were not mutated by the test.")
+          print("Verified: real products.csv, review_state.json, and content files were not mutated by the isolated test.")
           PY
