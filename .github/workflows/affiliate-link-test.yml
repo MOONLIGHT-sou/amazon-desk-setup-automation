@@ -7,6 +7,7 @@ on:
       - 'affiliate_link.py'
       - 'test_affiliate_link.py'
       - 'products.csv'
+      - 'product_facts.json'
       - '.github/workflows/affiliate-link-test.yml'
 
 permissions:
@@ -28,21 +29,22 @@ jobs:
       - name: Run affiliate link regression
         run: python test_affiliate_link.py
 
-      - name: Verify P005 link is the verified ASIN and Associate tag
+      - name: Verify current unused candidate link against exact ASIN and Associate tag
         run: |
           python - <<'PY'
-          import csv
+          import csv, json
           from affiliate_link import validate_affiliate_link
 
-          with open('products.csv', newline='', encoding='utf-8') as file:
-              rows = list(csv.DictReader(file))
+          rows = list(csv.DictReader(open('products.csv', newline='', encoding='utf-8')))
+          target = next((row for row in rows if row.get('used', '').strip().lower() == 'no'), None)
+          assert target is not None, 'No unused candidate exists.'
 
-          p005 = next(row for row in rows if row['product_id'] == 'P005')
-          assert p005['used'] == 'No'
+          facts = json.load(open('product_facts.json', encoding='utf-8'))['facts'][target['product_id']]
+          assert facts.get('asin'), f"Missing ASIN evidence for {target['product_id']}"
           validate_affiliate_link(
-              p005['amazon_link'],
-              'B0GL2ZFVR1',
+              target['amazon_link'],
+              facts['asin'],
               'moonlight0adc-21',
           )
-          print('P005 affiliate-link verification: PASS')
+          print(f"{target['product_id']} affiliate-link verification: PASS ({facts['asin']})")
           PY
