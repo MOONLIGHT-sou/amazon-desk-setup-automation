@@ -24,6 +24,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
           python - <<'PY'
           import csv
           import hashlib
@@ -55,40 +56,37 @@ jobs:
               if path.is_file()
           } if (repo_root / "content").exists() else {}
 
+          before_rows = read_rows(repo_root / "products.csv")
+          target = next((row for row in before_rows if row.get("used", "").strip().lower() == "no"), None)
+          if target is None:
+              raise SystemExit("TEST FAILURE: repository has no unused candidate for isolated production simulation.")
+          target_id = target["product_id"]
+          before_products_by_id = {row["product_id"]: dict(row) for row in before_rows}
+
           with tempfile.TemporaryDirectory() as tmp:
               root = Path(tmp)
               products_path = root / "products.csv"
               review_path = root / "review_state.json"
               evidence_path = root / "selection_evidence.json"
+              facts_path = root / "product_facts.json"
               content_root = root / "content"
 
               products_path.write_bytes(repo_products)
-              before_rows = read_rows(products_path)
-              before_target = next((row for row in before_rows if row.get("product_id") == "P005"), None)
-              if before_target is None:
-                  raise SystemExit("TEST FAILURE: isolated fixture is missing P005.")
-              if before_target.get("used", "").strip().lower() != "no":
-                  raise SystemExit(
-                      "TEST FAILURE: isolated fixture P005 was not initially unused "
-                      f"(observed used={before_target.get('used')!r})."
-                  )
-              before_products_by_id = {row["product_id"]: dict(row) for row in before_rows}
 
               review = json.loads(repo_review.decode("utf-8"))
-              review["products"]["P005"]["status"] = "APPROVED"
-              review["products"]["P005"]["human_review"] = "APPROVED"
-              review["products"]["P005"]["approved_for_production"] = True
+              if target_id not in review.get("products", {}):
+                  raise SystemExit(f"TEST FAILURE: review_state.json has no {target_id} entry.")
+              review["products"][target_id]["status"] = "APPROVED"
+              review["products"][target_id]["human_review"] = "APPROVED"
+              review["products"][target_id]["approved_for_production"] = True
               review_path.write_text(json.dumps(review), encoding="utf-8")
               shutil.copyfile(repo_root / "selection_evidence.json", evidence_path)
+              shutil.copyfile(repo_root / "product_facts.json", facts_path)
 
               os.environ["TEST_MODE"] = "false"
               os.environ["DRY_RUN"] = "false"
-              os.environ["TARGET_PRODUCT_ID"] = "P005"
+              os.environ["TARGET_PRODUCT_ID"] = target_id
 
-              # The production code intentionally uses repository-relative paths.
-              # Isolate the complete filesystem view by changing into the temp repo,
-              # rather than monkey-patching module globals that are also used as
-              # default arguments. This exercises the real production path exactly.
               previous_cwd = Path.cwd()
               try:
                   os.chdir(root)
@@ -97,14 +95,12 @@ jobs:
                   os.chdir(previous_cwd)
 
               after_rows = read_rows(products_path)
-              after_target = next((row for row in after_rows if row.get("product_id") == "P005"), None)
+              after_target = next((row for row in after_rows if row.get("product_id") == target_id), None)
               if after_target is None:
-                  raise SystemExit("TEST FAILURE: isolated production removed P005.")
-              if after_target.get("product_id") != "P005":
-                  raise SystemExit("TEST FAILURE: isolated production returned the wrong target identity.")
+                  raise SystemExit(f"TEST FAILURE: isolated production removed {target_id}.")
               if after_target.get("used", "").strip().lower() != "yes":
                   raise SystemExit(
-                      "TEST FAILURE: isolated approved production did not consume P005 "
+                      f"TEST FAILURE: isolated approved production did not consume {target_id} "
                       f"(observed used={after_target.get('used')!r})."
                   )
 
@@ -113,12 +109,12 @@ jobs:
                   raise SystemExit("SAFETY FAILURE: isolated production changed the product set.")
               for product_id, before_row in before_products_by_id.items():
                   after_row = after_products_by_id[product_id]
-                  if product_id == "P005":
+                  if product_id == target_id:
                       expected = dict(before_row)
                       expected["used"] = "Yes"
                       if after_row != expected:
                           raise SystemExit(
-                              "SAFETY FAILURE: P005 mutation was not exactly No -> Yes "
+                              f"SAFETY FAILURE: {target_id} mutation was not exactly No -> Yes "
                               f"(before={before_row!r}, after={after_row!r})."
                           )
                   elif after_row != before_row:
@@ -126,15 +122,17 @@ jobs:
                           f"SAFETY FAILURE: product {product_id} changed during isolated production."
                       )
 
-              package = content_root / "P005" / "package.txt"
+              package = content_root / target_id / "package.txt"
               if not package.is_file() or package.stat().st_size == 0:
-                  raise SystemExit("TEST FAILURE: isolated production did not create the content package.")
+                  raise SystemExit(f"TEST FAILURE: isolated production did not create {target_id} content package.")
 
               package_text = package.read_text(encoding="utf-8")
+              facts = json.load(open(facts_path, encoding="utf-8"))["facts"][target_id]
               required = (
-                  "P005",
-                  "AERYS Vintage Style Alarm Clock",
-                  "https://www.amazon.in/dp/B0GL2ZFVR1?tag=moonlight0adc-21",
+                  target_id,
+                  facts["product_name"],
+                  facts["asin"],
+                  facts["amazon_link"],
                   "As an Amazon Associate I earn from qualifying purchases.",
               )
               for value in required:
@@ -155,7 +153,7 @@ jobs:
               raise SystemExit("SAFETY FAILURE: real repository content was mutated by the isolated test.")
 
           print("Production path safety: PASS")
-          print("Verified: intelligent selection, human authorization, exact-ASIN affiliate validation, content QC, and exact isolated P005 No -> Yes mutation all work.")
-          print("Verified: all other isolated product rows remain unchanged.")
+          print(f"Verified: isolated approved-production path consumed {target_id} exactly No -> Yes.")
+          print("Verified: all other isolated product rows remained unchanged.")
           print("Verified: real products.csv, review_state.json, and content files were not mutated by the isolated test.")
           PY
