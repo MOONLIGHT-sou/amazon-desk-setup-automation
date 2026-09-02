@@ -108,6 +108,9 @@ jobs:
     permissions:
       contents: write
 
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+
     steps:
       - name: Checkout exact reviewed revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -219,7 +222,18 @@ jobs:
         run: |
           set -euo pipefail
           CONTENT_FILE="content/${TARGET_PRODUCT_ID}/package.txt"
-          UNEXPECTED="$(git status --porcelain=v1 --untracked-files=all | awk -v expected="$CONTENT_FILE" '!($0 ~ /^ M products\.csv$/ || $0 ~ ("^\\?\? " expected "$")) { print }')"
+          UNEXPECTED="$(
+            git status --porcelain=v1 --untracked-files=all |
+            while IFS= read -r line; do
+              case "$line" in
+                " M products.csv"|"?? $CONTENT_FILE")
+                  ;;
+                *)
+                  printf '%s\n' "$line"
+                  ;;
+              esac
+            done
+          )"
           if [ -n "$UNEXPECTED" ]; then
             echo "SAFETY FAILURE: unexpected repository changes detected:"
             echo "$UNEXPECTED"
