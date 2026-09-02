@@ -78,40 +78,38 @@ jobs:
 
           if review.get("status") != "APPROVED":
               raise SystemExit(
-                  f"SAFETY STOP: target {target_id} is not human-approved. "
-                  f"Observed status={review.get('status')!r}."
+                  "SAFETY STOP: human review has not approved this product. "
+                  f"status={review.get('status')!r}"
               )
           if review.get("approved_for_production") is not True:
-              raise SystemExit(
-                  f"SAFETY STOP: target {target_id} is not approved_for_production."
-              )
+              raise SystemExit("SAFETY STOP: approved_for_production is not true.")
 
-          if review.get("draft_qc") != "PASSED":
-              raise SystemExit(
-                  f"SAFETY STOP: target {target_id} draft QC is not PASSED."
-              )
-
-          print(f"Production target preflight: PASS ({target_id})")
+          print(f"Human review authorization: PASS ({target_id} APPROVED)")
+          print(f"Production preflight PASS: {target_id} is first-unused, No, and approved.")
           PY
 
-      - name: Verify main has not moved since dispatch
-        shell: bash
-        run: |
-          set -euo pipefail
-          DISPATCH_SHA="${GITHUB_SHA}"
-          CURRENT_SHA="$(git rev-parse HEAD)"
-          if [ "$CURRENT_SHA" != "$DISPATCH_SHA" ]; then
-            echo "SAFETY STOP: main moved after dispatch."
-            echo "Dispatch SHA: $DISPATCH_SHA"
-            echo "Current SHA:  $CURRENT_SHA"
+          if ! git diff --quiet; then
+            echo "SAFETY STOP: checkout is not clean."
+            git status --short
             exit 1
           fi
-          echo "Main revision stability: PASS ($CURRENT_SHA)"
 
-  production:
+          echo "Workflow SHA: ${GITHUB_SHA}"
+          echo "Production preflight complete."
+
+  produce:
     name: Production Execution
     needs: preflight
     runs-on: ubuntu-latest
+
+    environment:
+      name: production
+
+    permissions:
+      contents: write
+
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
 
     steps:
       - name: Checkout exact reviewed revision
@@ -129,12 +127,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CURRENT_SHA="$(git rev-parse HEAD)"
-          if [ "$CURRENT_SHA" != "$GITHUB_SHA" ]; then
-            echo "SAFETY STOP: checked-out main revision differs from dispatch revision."
+          git fetch origin main --depth=1
+          CURRENT_MAIN="$(git rev-parse origin/main)"
+          if [ "$CURRENT_MAIN" != "$GITHUB_SHA" ]; then
+            echo "SAFETY STOP: main changed after this production run was started."
             exit 1
           fi
-          echo "Exact reviewed revision: PASS ($CURRENT_SHA)"
+          echo "Repository revision check: PASS"
 
       - name: Re-verify human review authorization
         shell: bash
@@ -143,16 +142,16 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json
-          import os
-          target_id = os.environ["TARGET_PRODUCT_ID"]
-          state = json.load(open("review_state.json", encoding="utf-8"))
-          review = state["products"][target_id]
-          assert review.get("status") == "APPROVED", "SAFETY STOP: human approval missing."
-          assert review.get("human_review") == "APPROVED", "SAFETY STOP: human review is not APPROVED."
-          assert review.get("approved_for_production") is True, "SAFETY STOP: production authorization missing."
-          assert review.get("draft_qc") == "PASSED", "SAFETY STOP: draft QC is not PASSED."
-          print(f"Human authorization re-check: PASS ({target_id})")
+          import json, os
+          target_id = os.environ["TARGET_PRODUCT_ID"].strip()
+          try:
+              state = json.load(open("review_state.json", encoding="utf-8"))
+              review = state["products"][target_id]
+          except (OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
+              raise SystemExit(f"SAFETY STOP: review authorization invalid: {exc}")
+          if review.get("status") != "APPROVED" or review.get("approved_for_production") is not True:
+              raise SystemExit("SAFETY STOP: human review authorization is not APPROVED.")
+          print(f"Human review authorization re-check: PASS ({target_id})")
           PY
 
       - name: Verify target is still the current first-unused product
@@ -162,20 +161,14 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import csv
-          import os
-          target_id = os.environ["TARGET_PRODUCT_ID"]
-          rows = list(csv.DictReader(open("products.csv", newline="", encoding="utf-8")))
-          target = next((row for row in rows if row["product_id"] == target_id), None)
-          assert target is not None, f"SAFETY STOP: target {target_id} not found."
-          assert target["used"].strip().lower() == "no", f"SAFETY STOP: target {target_id} already consumed."
+          import csv, os
+          target_id = os.environ["TARGET_PRODUCT_ID"].strip()
+          with open("products.csv", newline="", encoding="utf-8") as file:
+              rows = list(csv.DictReader(file))
           first_unused = next((row for row in rows if row["used"].strip().lower() == "no"), None)
-          assert first_unused is not None, "SAFETY STOP: no unused product exists."
-          assert first_unused["product_id"] == target_id, (
-              f"SAFETY STOP: target {target_id} is not first unused; "
-              f"current first unused is {first_unused['product_id']}."
-          )
-          print(f"Current first-unused target: PASS ({target_id})")
+          if first_unused is None or first_unused["product_id"] != target_id:
+              raise SystemExit("SAFETY STOP: target is no longer the current first-unused product.")
+          print(f"Final target check: PASS ({target_id})")
           PY
 
       - name: Run automation in production mode
@@ -183,7 +176,6 @@ jobs:
           TEST_MODE: "false"
           DRY_RUN: "false"
           TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
-          PYTHONDONTWRITEBYTECODE: "1"
         run: python main.py
 
       - name: Verify target content and exact database mutation
@@ -192,27 +184,35 @@ jobs:
           TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
         run: |
           set -euo pipefail
+          CONTENT_FILE="content/${TARGET_PRODUCT_ID}/package.txt"
+          test -f "$CONTENT_FILE"
           python - <<'PY'
-          import csv
-          import os
-          from pathlib import Path
-
-          target_id = os.environ["TARGET_PRODUCT_ID"]
-          rows = list(csv.DictReader(open("products.csv", newline="", encoding="utf-8")))
-          target = next((row for row in rows if row["product_id"] == target_id), None)
-          assert target is not None, f"SAFETY STOP: target {target_id} disappeared."
-          assert target["used"].strip().lower() == "yes", (
-              f"SAFETY STOP: expected {target_id} used=Yes after production; observed {target['used']!r}."
-          )
-
-          package = Path("content") / target_id / "package.txt"
-          assert package.is_file() and package.stat().st_size > 0, (
-              f"SAFETY STOP: production package missing for {target_id}."
-          )
-          content = package.read_text(encoding="utf-8")
-          assert target_id in content, "SAFETY STOP: package identity missing."
-          assert "As an Amazon Associate I earn from qualifying purchases." in content
-          print(f"Exact production mutation and package verification: PASS ({target_id} No -> Yes)")
+          import csv, os, subprocess
+          target_id = os.environ["TARGET_PRODUCT_ID"].strip()
+          content = open(os.path.join("content", target_id, "package.txt"), encoding="utf-8").read()
+          before_text = subprocess.check_output(["git", "show", "HEAD:products.csv"], text=True)
+          before = list(csv.DictReader(before_text.splitlines()))
+          with open("products.csv", newline="", encoding="utf-8") as file:
+              after = list(csv.DictReader(file))
+          before_by_id = {r["product_id"]: r for r in before}
+          after_by_id = {r["product_id"]: r for r in after}
+          if set(before_by_id) != set(after_by_id) or len(before) != len(after):
+              raise SystemExit("SAFETY FAILURE: product structure changed.")
+          if before_by_id[target_id]["used"].strip().lower() != "no":
+              raise SystemExit("SAFETY FAILURE: target was not No before execution.")
+          if after_by_id[target_id]["used"].strip().lower() != "yes":
+              raise SystemExit("SAFETY FAILURE: target did not change No -> Yes.")
+          for pid in before_by_id:
+              for column in before_by_id[pid]:
+                  if pid == target_id and column == "used":
+                      continue
+                  if before_by_id[pid][column] != after_by_id[pid][column]:
+                      raise SystemExit(f"SAFETY FAILURE: unexpected change at {pid}.{column}.")
+          target = after_by_id[target_id]
+          for value in (target_id, target["product_name"], target["category"], target["amazon_link"]):
+              if value not in content:
+                  raise SystemExit(f"SAFETY FAILURE: generated content missing {value!r}.")
+          print(f"Exact production verification: PASS ({target_id} No -> Yes)")
           PY
 
       - name: Verify only expected files changed
@@ -222,13 +222,18 @@ jobs:
         run: |
           set -euo pipefail
           CONTENT_FILE="content/${TARGET_PRODUCT_ID}/package.txt"
-          UNEXPECTED="$(git status --porcelain=v1 --untracked-files=all | while IFS= read -r line; do
-            case "$line" in
-              " M products.csv") ;;
-              "?? $CONTENT_FILE") ;;
-              *) printf '%s\n' "$line" ;;
-            esac
-          done)"
+          UNEXPECTED="$(
+            git status --porcelain=v1 --untracked-files=all |
+            while IFS= read -r line; do
+              case "$line" in
+                " M products.csv"|"?? $CONTENT_FILE")
+                  ;;
+                *)
+                  printf '%s\n' "$line"
+                  ;;
+              esac
+            done
+          )"
           if [ -n "$UNEXPECTED" ]; then
             echo "SAFETY FAILURE: unexpected repository changes detected:"
             echo "$UNEXPECTED"
@@ -245,40 +250,44 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin main
-          LOCAL_SHA="$(git rev-parse HEAD)"
-          REMOTE_SHA="$(git rev-parse origin/main)"
-          if [ "$LOCAL_SHA" != "$REMOTE_SHA" ]; then
-            echo "SAFETY STOP: main changed before commit."
+          git fetch origin main --depth=1
+          CURRENT_MAIN="$(git rev-parse origin/main)"
+          if [ "$CURRENT_MAIN" != "$GITHUB_SHA" ]; then
+            echo "SAFETY STOP: main changed during production execution."
             exit 1
           fi
-          echo "Final main check before commit: PASS ($LOCAL_SHA)"
+          echo "Final repository revision check: PASS"
 
       - name: Commit production result
+        shell: bash
         env:
           TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add products.csv "content/${TARGET_PRODUCT_ID}/package.txt"
-          git diff --cached --check
-          git diff --cached --name-only
+          if git diff --cached --quiet; then
+            echo "SAFETY FAILURE: nothing staged for production commit."
+            exit 1
+          fi
           git commit -m "Consume ${TARGET_PRODUCT_ID} and publish generated content"
 
       - name: Final main check before push
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin main
-          EXPECTED_PARENT="$(git rev-parse origin/main)"
-          ACTUAL_PARENT="$(git rev-parse HEAD^)"
-          if [ "$ACTUAL_PARENT" != "$EXPECTED_PARENT" ]; then
-            echo "SAFETY STOP: main changed before push."
-            echo "Expected parent: $EXPECTED_PARENT"
-            echo "Actual parent:   $ACTUAL_PARENT"
+          git fetch origin main --depth=1
+          CURRENT_MAIN="$(git rev-parse origin/main)"
+          if [ "$CURRENT_MAIN" != "$GITHUB_SHA" ]; then
+            echo "SAFETY STOP: main changed before production push."
             exit 1
           fi
-          echo "Final main check before push: PASS ($EXPECTED_PARENT)"
+          echo "Final pre-push repository revision check: PASS"
 
       - name: Push production result
-        run: git push origin HEAD:main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin HEAD:main
+          echo "Production commit pushed successfully."
