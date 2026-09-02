@@ -19,26 +19,32 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Verify current P005 state is not production-authorized
+      - name: Verify current first-unused product is not production-authorized
         run: |
           python - <<'PY'
-          import json
+          import csv, json
+          products = list(csv.DictReader(open('products.csv', newline='', encoding='utf-8')))
+          target = next((row for row in products if row.get('used', '').strip().lower() == 'no'), None)
+          assert target is not None, 'No unused candidate exists.'
+
           state = json.load(open('review_state.json', encoding='utf-8'))
-          p005 = state['products']['P005']
-          assert p005['status'] == 'PENDING_HUMAN_REVIEW'
-          assert p005['approved_for_production'] is False
-          print('Current P005 authorization state: BLOCKED as expected')
+          review = state['products'][target['product_id']]
+          assert review['status'] == 'PENDING_HUMAN_REVIEW'
+          assert review['approved_for_production'] is False
+          print(f"Current {target['product_id']} authorization state: BLOCKED as expected")
           PY
 
       - name: Simulate production authorization decision
         run: |
           python - <<'PY'
-          import json
+          import csv, json
+          products = list(csv.DictReader(open('products.csv', newline='', encoding='utf-8')))
+          target = next(row for row in products if row.get('used', '').strip().lower() == 'no')
           state = json.load(open('review_state.json', encoding='utf-8'))
-          review = state['products']['P005']
+          review = state['products'][target['product_id']]
           authorized = review.get('status') == 'APPROVED' and review.get('approved_for_production') is True
           assert authorized is False, 'SAFETY FAILURE: unapproved product would be authorized.'
-          print('Fail-closed authorization decision: PASS')
+          print(f"Fail-closed authorization decision: PASS ({target['product_id']})")
           PY
 
       - name: Verify no production mutation occurred
