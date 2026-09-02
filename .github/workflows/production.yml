@@ -172,6 +172,7 @@ jobs:
         env:
           TEST_MODE: "false"
           DRY_RUN: "false"
+          TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
         run: python main.py
 
       - name: Verify target content and exact database mutation
