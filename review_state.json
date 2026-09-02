@@ -7,6 +7,13 @@
       "selection": "REVIEW",
       "human_review": "APPROVED",
       "approved_for_production": true
+    },
+    "P006": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true
     }
   }
 }
