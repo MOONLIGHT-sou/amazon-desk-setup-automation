@@ -13,6 +13,7 @@ CONTENT_DIR = "content"
 TEST_OUTPUT_DIR = ".test-output"
 REVIEW_STATE_FILE = "review_state.json"
 SELECTION_EVIDENCE_FILE = "selection_evidence.json"
+PRODUCT_FACTS_FILE = "product_facts.json"
 AMAZON_ASSOCIATE_TAG = "moonlight0adc-21"
 
 REQUIRED_COLUMNS = {"product_id", "product_name", "category", "amazon_link", "used"}
@@ -175,6 +176,24 @@ def load_products(path=PRODUCTS_FILE):
     return products
 
 
+def load_product_facts(product_id):
+    try:
+        with open(PRODUCT_FACTS_FILE, encoding="utf-8") as file:
+            facts = json.load(file)["facts"][product_id]
+    except (OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
+        raise RuntimeError(
+            f"Content safety failed: verified product facts are unavailable for {product_id}: {exc}"
+        ) from exc
+
+    safe_facts = facts.get("safe_facts")
+    if not isinstance(safe_facts, list) or not all(isinstance(item, str) and item.strip() for item in safe_facts):
+        raise RuntimeError(
+            f"Content safety failed: safe_facts are missing or invalid for {product_id}."
+        )
+
+    return facts
+
+
 def select_for_run(products, test_mode):
     report = build_report()
     selection = select_candidate(products, report)
@@ -254,10 +273,15 @@ def build_content(product):
     name = product["product_name"]
     category = product["category"]
     link = product["amazon_link"]
+    facts = load_product_facts(product["product_id"])
+    variant = facts.get("variant", "").strip()
+    safe_facts = facts["safe_facts"]
     profile_name, profile = infer_profile(product)
     label = product_label(product)
 
     checklist = "\n".join(f"- {item.capitalize()}." for item in profile["sections"])
+    verified_facts = "\n".join(f"- {item}." for item in safe_facts)
+    variant_line = f"Verified variant: {variant}\n" if variant else ""
 
     medium_title = f"How to Decide If a {name} Upgrade Earns a Place on Your Desk"
     medium_subtitle = (
@@ -277,6 +301,9 @@ Introduction:
 A minimal desk is easier to maintain when every item has a clear job. That does not mean buying the fewest products possible. It means choosing upgrades that solve a recurring problem without creating a new one. {name} is a {category.lower()} option worth evaluating when the way you use your workspace suggests that this particular type of upgrade could earn its space.
 
 The useful question is not whether {name} looks good in a desk photo. The useful question is whether it fits your desk, your routine, and the amount of complexity you are willing to maintain. This guide is deliberately written as a decision guide rather than a product review because the current price, specifications, compatibility, and availability should be checked on the seller's listing before purchase.
+
+Verified Product Facts:
+{variant_line}{verified_facts}
 
 Why This Type of Upgrade Can Make Sense:
 {profile["fit"]} The clearest reason to consider {name} is a specific recurring need. If there is no clear need, adding another accessory can make a minimal setup harder to manage rather than better.
@@ -435,6 +462,18 @@ def verify_content(content, product):
         if not required_text or required_text not in content:
             raise RuntimeError(
                 f"Content verification failed: missing '{required_text}'."
+            )
+
+    facts = load_product_facts(product["product_id"])
+    variant = facts.get("variant", "").strip()
+    if variant and variant not in content:
+        raise RuntimeError(
+            f"Content verification failed: verified product variant '{variant}' is missing."
+        )
+    for safe_fact in facts["safe_facts"]:
+        if safe_fact not in content:
+            raise RuntimeError(
+                f"Content verification failed: verified safe fact '{safe_fact}' is missing."
             )
 
     assert_no_pattern(
