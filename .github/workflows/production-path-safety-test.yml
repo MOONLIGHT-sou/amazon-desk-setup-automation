@@ -2,6 +2,7 @@ name: Production Path Safety - Test
 
 on:
   workflow_dispatch:
+  push:
 
 permissions:
   contents: read
