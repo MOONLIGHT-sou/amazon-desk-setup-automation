@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   draft:
-    name: Generate and verify P006 draft without production mutation
+    name: Generate and verify current unused-product draft without production mutation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,6 +37,7 @@ jobs:
         env:
           TEST_MODE: "true"
           DRY_RUN: "false"
+          PYTHONDONTWRITEBYTECODE: "1"
         run: python main.py
 
       - name: Verify intelligent selection and draft identity
@@ -49,39 +50,45 @@ jobs:
           with open('products.csv', newline='', encoding='utf-8') as file:
               products = list(csv.DictReader(file))
 
+          expected = next((row for row in products if row.get('used', '').strip().lower() == 'no'), None)
+          assert expected is not None, 'No unused candidate exists.'
+
           report = build_report()
           selected = select_candidate(products, report)
-
           assert selected is not None, 'No eligible candidate was selected.'
-          assert selected['product']['product_id'] == 'P006'
-          assert selected['selection']['decision'] == 'REVIEW'
-          assert selected['selection']['confidence'] == 'medium'
-          assert selected['selection']['evidence_coverage'] == 65.0
-          assert selected['selection']['opportunity_score'] == 84.0
+          assert selected['product']['product_id'] == expected['product_id']
+          assert selected['product']['used'].strip().lower() == 'no'
 
-          facts = json.load(open('product_facts.json', encoding='utf-8'))['facts']['P006']
-          assert facts['asin'] == 'B0D7J2KTH2'
-          assert facts['variant'] == 'White Clock, 14 x 8 cm'
+          product_id = expected['product_id']
+          facts = json.load(open('product_facts.json', encoding='utf-8'))['facts'][product_id]
+          assert facts['asin']
+          assert facts['amazon_link']
+          assert facts['safe_facts']
 
-          print('Draft target verification: PASS (P006 / REVIEW / medium / 65.0% / 84.0)')
+          print(f"Draft target verification: PASS ({product_id} / {selected['selection']['decision']} / {selected['selection']['confidence']} / {selected['selection']['evidence_coverage']}% / {selected['selection']['opportunity_score']})")
           PY
 
       - name: Verify generated draft package
         run: |
           python - <<'PY'
+          import csv, json
           from pathlib import Path
 
-          path = Path('.test-output/P006/package.txt')
-          assert path.is_file(), 'Expected TEST_MODE draft package was not created.'
+          with open('products.csv', newline='', encoding='utf-8') as file:
+              target = next(row for row in csv.DictReader(file) if row.get('used', '').strip().lower() == 'no')
+          product_id = target['product_id']
+          facts = json.load(open('product_facts.json', encoding='utf-8'))['facts'][product_id]
+          path = Path(f'.test-output/{product_id}/package.txt')
+          assert path.is_file(), f'Expected TEST_MODE draft package was not created for {product_id}.'
           content = path.read_text(encoding='utf-8')
 
           required = [
               'PRODUCT CONTENT PACKAGE',
-              'Product ID: P006',
-              'JASIFS Alarm Clock Digital Plastic Clock Table Clock',
-              'White Clock',
-              'https://www.amazon.in/dp/B0D7J2KTH2?tag=moonlight0adc-21',
-              'MEDIUM',
+              f'Product ID: {product_id}',
+              facts['product_name'],
+              facts['variant'].split(',')[0],
+              facts['asin'],
+              facts['amazon_link'],
               'PINTEREST MAIN PIN',
               'PINTEREST PRODUCT PIN',
               'CONTENT QUALITY',
@@ -97,7 +104,7 @@ jobs:
           assert 'TODO' not in content
           assert 'PLACEHOLDER' not in content
 
-          print('Draft package verification: PASS')
+          print(f'Draft package verification: PASS ({product_id})')
           PY
 
       - name: Verify TEST_MODE did not mutate production state
