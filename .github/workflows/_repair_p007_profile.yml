@@ -1,5 +1,6 @@
 name: Temporary P007 Profile Repair
 
+# Temporary one-shot repair; removed after successful execution.
 on:
   push:
     paths:
