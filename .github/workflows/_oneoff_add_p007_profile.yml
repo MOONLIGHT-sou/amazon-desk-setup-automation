@@ -37,3 +37,4 @@ jobs:
           git add main.py
           git commit -m 'chore: add P007 approved product profile'
           git push
+# trigger repair check
