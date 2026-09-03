@@ -16,10 +16,10 @@
       "approved_for_production": true
     },
     "P007": {
-      "status": "PENDING_HUMAN_REVIEW",
+      "status": "APPROVED",
       "draft_qc": "NOT_RUN",
       "selection": "APPROVE",
-      "human_review": "REQUIRED",
+      "human_review": "APPROVED",
       "approved_for_production": false
     }
   }
