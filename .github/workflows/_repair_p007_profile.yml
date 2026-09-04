@@ -30,13 +30,14 @@ jobs:
           if marker in text:
               raise SystemExit("P007 cooling_pad profile already exists; refusing duplicate patch.")
 
-          needle = "\n\n\ndef load_products"
+          needle = "\n}\n\n\ndef load_products"
           if needle not in text:
               raise SystemExit("Could not find PRODUCT_PROFILES insertion boundary.")
 
           profile = '''\n    "cooling_pad": {\n        "keywords": ("cooling", "pad"),\n        "angle": "adding a laptop cooling accessory while keeping the desk footprint and cable setup under control",\n        "fit": (\n            "A laptop cooling pad is worth evaluating when you want a dedicated platform for the laptop and the listed design fits your machine and workspace. "\n            "The decision should be based on the seller's specifications and your actual desk layout, not on a promise of guaranteed temperature or performance improvement."\n        ),\n        "sections": (\n            "listed dimensions and available desk space",\n            "laptop size and compatibility information supplied by the seller",\n            "USB power and port requirements",\n            "fan and stand features stated by the seller",\n            "whether the stand position and cable routing fit the desk",\n        ),\n        "tradeoffs": (\n            "A cooling pad adds another device, cable, and occupied surface area to the desk. "\n            "Check the listing's dimensions, compatibility, power requirements, and stated features before buying, and do not assume a specific temperature reduction or gaming-performance gain."\n        ),\n    },'''
 
-          text = text.replace(needle, profile + needle, 1)
+          replacement = profile + "\n}" + needle[len("\n}"):]
+          text = text.replace(needle, replacement, 1)
           path.write_text(text, encoding="utf-8")
           PY
 
