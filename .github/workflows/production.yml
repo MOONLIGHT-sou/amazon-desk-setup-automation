@@ -6,7 +6,6 @@ on:
       target_product_id:
         description: "Product ID expected to be consumed; must be the current first-unused product"
         required: true
-        default: "P007"
         type: string
 
 permissions:
@@ -51,6 +50,8 @@ jobs:
           import os
 
           target_id = os.environ["TARGET_PRODUCT_ID"].strip()
+          if not target_id:
+              raise SystemExit("SAFETY STOP: target_product_id must not be empty.")
 
           with open("products.csv", newline="", encoding="utf-8") as file:
               rows = list(csv.DictReader(file))
@@ -144,6 +145,8 @@ jobs:
           python - <<'PY'
           import json, os
           target_id = os.environ["TARGET_PRODUCT_ID"].strip()
+          if not target_id:
+              raise SystemExit("SAFETY STOP: target_product_id must not be empty.")
           try:
               state = json.load(open("review_state.json", encoding="utf-8"))
               review = state["products"][target_id]
@@ -163,6 +166,8 @@ jobs:
           python - <<'PY'
           import csv, os
           target_id = os.environ["TARGET_PRODUCT_ID"].strip()
+          if not target_id:
+              raise SystemExit("SAFETY STOP: target_product_id must not be empty.")
           with open("products.csv", newline="", encoding="utf-8") as file:
               rows = list(csv.DictReader(file))
           first_unused = next((row for row in rows if row["used"].strip().lower() == "no"), None)
