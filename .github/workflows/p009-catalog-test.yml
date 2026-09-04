@@ -1,0 +1,60 @@
+name: P009 Catalog Test
+
+on:
+  push:
+    branches:
+      - catalog/p009-portronics-my-buddy-air
+
+permissions:
+  contents: read
+
+jobs:
+  p009-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run TEST_MODE
+        env:
+          TEST_MODE: 'true'
+          DRY_RUN: 'true'
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python main.py
+      - name: Verify P009 selection and draft
+        run: |
+          python - <<'PY'
+          import csv, json
+          from candidate_selector import select_candidate
+          from selection_intelligence import build_report
+          from affiliate_link import validate_affiliate_link
+
+          products = list(csv.DictReader(open('products.csv', newline='', encoding='utf-8')))
+          target = next(row for row in products if row['product_id'] == 'P009')
+          assert target['used'] == 'No'
+          selected = select_candidate(products, build_report())
+          assert selected is not None
+          assert selected['product']['product_id'] == 'P009'
+          result = selected['selection']
+          print('Selection:', result)
+          assert result['decision'] == 'APPROVE'
+          assert result['evidence_coverage'] == 80.0
+          assert result['opportunity_score'] >= 80.0
+
+          facts = json.load(open('product_facts.json', encoding='utf-8'))['facts']['P009']
+          validate_affiliate_link(facts['amazon_link'], facts['asin'], 'moonlight0adc-21')
+          package = open('.test-output/P009/package.txt', encoding='utf-8').read()
+          for value in (facts['product_name'], facts['asin'], facts['amazon_link'], 'CONTENT QUALITY', 'Human review before publication: REQUIRED', 'As an Amazon Associate I earn from qualifying purchases.', '(paid link)'):
+              assert value in package, value
+          assert 'TODO' not in package
+          assert 'PLACEHOLDER' not in package
+          print('P009 TEST/QC/link verification: PASS')
+          PY
+      - name: Verify no production mutation
+        run: |
+          test "$(python -c "import csv; print(next(r['used'] for r in csv.DictReader(open('products.csv', newline='', encoding='utf-8')) if r['product_id']=='P009'))")" = "No"
+          test ! -d content/P009
+          echo 'Production mutation guard: PASS'
