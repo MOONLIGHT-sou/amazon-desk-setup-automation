@@ -136,6 +136,25 @@ PRODUCT_PROFILES = {
             "Use the seller's specifications to decide whether the display fits your space."
         ),
     },
+    "cooling_pad": {
+        "keywords": ("cooling", "pad"),
+        "angle": "adding a laptop cooling accessory while keeping the desk footprint and cable setup under control",
+        "fit": (
+            "A laptop cooling pad is worth evaluating when you want a dedicated platform for the laptop and the listed design fits your machine and workspace. "
+            "The decision should be based on the seller's specifications and your actual desk layout, not on a promise of guaranteed temperature or performance improvement."
+        ),
+        "sections": (
+            "listed dimensions and available desk space",
+            "laptop size and compatibility information supplied by the seller",
+            "USB power and port requirements",
+            "fan and stand features stated by the seller",
+            "whether the stand position and cable routing fit the desk",
+        ),
+        "tradeoffs": (
+            "A cooling pad adds another device, cable, and occupied surface area to the desk. "
+            "Check the listing's dimensions, compatibility, power requirements, and stated features before buying, and do not assume a specific temperature reduction or gaming-performance gain."
+        ),
+    },
 }
 
 
