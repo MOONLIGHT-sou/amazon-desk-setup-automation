@@ -4,7 +4,7 @@ name: Temporary P007 Profile Repair
 on:
   push:
     paths:
-      - .github/workflows/_repair_p007_profile.yml
+      - README.md
 
 permissions:
   contents: write
