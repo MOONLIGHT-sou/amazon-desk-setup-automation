@@ -29,7 +29,7 @@ BANNED_CLAIMS = (
     r"\bcure(s|d)?\b",
     r"\bprevent(s|ed)?\b",
     r"\bboost(s|ed) productivity\b",
-    r"\bimprove(s|d) eyesight\b",
+    r"\bimprove(s|ed) eyesight\b",
     r"\bprotect(s|ed) your eyes\b",
     r"\bhealth benefit(s)?\b",
 )
@@ -153,6 +153,27 @@ PRODUCT_PROFILES = {
         "tradeoffs": (
             "A cooling pad adds another device, cable, and occupied surface area to the desk. "
             "Check the listing's dimensions, compatibility, power requirements, and stated features before buying, and do not assume a specific temperature reduction or gaming-performance gain."
+        ),
+    },
+    "ring_light": {
+        "keywords": ("ring", "light"),
+        "angle": "adding controllable desk lighting for video calls, photos, and creator work without turning the workspace into a complicated lighting setup",
+        "fit": (
+            "A ring light can make sense when you regularly need a dedicated light source for video calls, "
+            "photos, or creator work and the included stand and controls fit the available desk or shooting space. "
+            "It should be evaluated as a lighting accessory, not as a guarantee of professional-looking results."
+        ),
+        "sections": (
+            "available desk or floor space for the included stand",
+            "light size and the mounting/holder arrangement supplied by the seller",
+            "brightness and color-mode controls listed by the seller",
+            "USB power and cable-routing requirements",
+            "whether the mobile holder and tripod arrangement fit the intended device and setup",
+        ),
+        "tradeoffs": (
+            "A ring light adds another stand, cable, and visible piece of equipment to the workspace. "
+            "Check the listing's dimensions, included components, power requirements, and device compatibility before buying. "
+            "Do not assume every phone, camera, tripod arrangement, or shooting environment will be equally stable or suitable."
         ),
     },
 }
