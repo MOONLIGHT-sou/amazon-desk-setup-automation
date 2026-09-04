@@ -58,6 +58,15 @@ jobs:
               with path.open(newline="", encoding="utf-8") as file:
                   return list(csv.DictReader(file))
 
+          def write_rows(path, rows):
+              if not rows:
+                  raise SystemExit("TEST FAILURE: products.csv contains no rows.")
+              fieldnames = list(rows[0].keys())
+              with path.open("w", newline="", encoding="utf-8") as file:
+                  writer = csv.DictWriter(file, fieldnames=fieldnames)
+                  writer.writeheader()
+                  writer.writerows(rows)
+
           repo_root = Path.cwd()
           repo_products = (repo_root / "products.csv").read_bytes()
           repo_review = (repo_root / "review_state.json").read_bytes()
@@ -67,12 +76,26 @@ jobs:
               if path.is_file()
           } if (repo_root / "content").exists() else {}
 
-          before_rows = read_rows(repo_root / "products.csv")
-          target = next((row for row in before_rows if row.get("used", "").strip().lower() == "no"), None)
+          repository_rows = read_rows(repo_root / "products.csv")
+          target = next(
+              (row for row in repository_rows if row.get("used", "").strip().lower() == "no"),
+              None,
+          )
+          synthetic_target = False
           if target is None:
-              raise SystemExit("TEST FAILURE: repository has no unused candidate for isolated production simulation.")
+              # The production catalog can legitimately reach an all-consumed state.
+              # Keep the regression test live by creating a No -> Yes candidate only
+              # inside the temporary simulation directory; never alter the repository copy.
+              target = repository_rows[-1]
+              synthetic_target = True
+
           target_id = target["product_id"]
-          before_products_by_id = {row["product_id"]: dict(row) for row in before_rows}
+          simulation_rows = [dict(row) for row in repository_rows]
+          simulation_target = next(row for row in simulation_rows if row["product_id"] == target_id)
+          simulation_target["used"] = "No"
+          before_products_by_id = {
+              row["product_id"]: dict(row) for row in simulation_rows
+          }
 
           with tempfile.TemporaryDirectory() as tmp:
               root = Path(tmp)
@@ -82,7 +105,7 @@ jobs:
               facts_path = root / "product_facts.json"
               content_root = root / "content"
 
-              products_path.write_bytes(repo_products)
+              write_rows(products_path, simulation_rows)
 
               review = json.loads(repo_review.decode("utf-8"))
               if target_id not in review.get("products", {}):
@@ -140,7 +163,13 @@ jobs:
 
               package_text = package.read_text(encoding="utf-8")
               facts = json.load(open(facts_path, encoding="utf-8"))["facts"][target_id]
-              required = (target_id, facts["product_name"], facts["asin"], facts["amazon_link"], "As an Amazon Associate I earn from qualifying purchases.")
+              required = (
+                  target_id,
+                  facts["product_name"],
+                  facts["asin"],
+                  facts["amazon_link"],
+                  "As an Amazon Associate I earn from qualifying purchases.",
+              )
               for value in required:
                   if value not in package_text:
                       raise SystemExit(f"TEST FAILURE: isolated package missing {value!r}.")
@@ -158,8 +187,9 @@ jobs:
           if current_content_files != repo_content_files:
               raise SystemExit("SAFETY FAILURE: real repository content was mutated by the isolated test.")
 
+          mode = "synthetic temporary candidate" if synthetic_target else "repository unused candidate"
           print("Production path safety: PASS")
-          print(f"Verified: isolated approved-production path consumed {target_id} exactly No -> Yes.")
+          print(f"Verified: isolated approved-production path consumed {target_id} exactly No -> Yes ({mode}).")
           print("Verified: all other isolated product rows remained unchanged.")
           print("Verified: real products.csv, review_state.json, and content files were not mutated by the isolated test.")
           PY
