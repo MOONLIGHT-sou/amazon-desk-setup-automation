@@ -37,6 +37,7 @@ jobs:
           facts = json.load(open('product_facts.json', encoding='utf-8'))['facts']['P007']
           assert facts['asin'] == 'B07YWS9SP9'
           assert facts['amazon_link'] == target['amazon_link']
+          assert facts['product_name'] == target['product_name']
           assert 'cooling_pad' in main.PRODUCT_PROFILES
           selected = select_candidate(rows, build_report())
           assert selected and selected['product']['product_id'] == 'P007'
@@ -97,4 +98,4 @@ jobs:
           ! find . -type d -name '__pycache__' -print -quit | grep -q .
           echo 'Artifact hygiene: PASS'
 
-# retrigger after corrected affiliate-link assertion
+# final retrigger after catalog CSV correction
