@@ -17,10 +17,10 @@
     },
     "P007": {
       "status": "APPROVED",
-      "draft_qc": "NOT_RUN",
+      "draft_qc": "PASSED",
       "selection": "APPROVE",
       "human_review": "APPROVED",
-      "approved_for_production": false
+      "approved_for_production": true
     }
   }
 }
