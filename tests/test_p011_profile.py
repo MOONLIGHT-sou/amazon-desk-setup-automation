@@ -31,3 +31,10 @@ def test_keyboard_storage_does_not_select_keyboard_profile():
 def test_p011_consumption_state_is_unchanged_by_profile_inference():
     product = load_p011()
     assert product["used"].strip().lower() == "yes"
+
+
+if __name__ == "__main__":
+    test_p011_profile_is_desk_shelf()
+    test_keyboard_storage_does_not_select_keyboard_profile()
+    test_p011_consumption_state_is_unchanged_by_profile_inference()
+    print("P011 profile regression: PASS")
