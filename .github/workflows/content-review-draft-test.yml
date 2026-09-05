@@ -8,6 +8,7 @@ on:
       - "product_facts.json"
       - "products.csv"
       - "selection_evidence.json"
+      - "review_state.json"
       - "candidate_selector.py"
       - "selection_intelligence.py"
       - ".github/workflows/content-review-draft-test.yml"
