@@ -1,68 +1,15 @@
 {
   "version": 1,
   "products": {
-    "P005": {
-      "status": "APPROVED",
-      "draft_qc": "PASSED",
-      "selection": "REVIEW",
-      "human_review": "APPROVED",
-      "approved_for_production": true
-    },
-    "P006": {
-      "status": "APPROVED",
-      "draft_qc": "PASSED",
-      "selection": "REVIEW",
-      "human_review": "APPROVED",
-      "approved_for_production": true
-    },
-    "P007": {
-      "status": "APPROVED",
-      "draft_qc": "PASSED",
-      "selection": "APPROVE",
-      "human_review": "APPROVED",
-      "approved_for_production": true
-    },
-    "P008": {
-      "status": "APPROVED",
-      "draft_qc": "PASSED",
-      "selection": "REVIEW",
-      "human_review": "APPROVED",
-      "approved_for_production": true
-    },
-    "P009": {
-      "status": "APPROVED",
-      "draft_qc": "PASSED",
-      "selection": "APPROVE",
-      "human_review": "APPROVED",
-      "approved_for_production": true
-    },
-    "P010": {
-      "status": "APPROVED",
-      "draft_qc": "PASSED",
-      "selection": "APPROVE",
-      "human_review": "APPROVED",
-      "approved_for_production": true
-    },
-    "P011": {
-      "status": "APPROVED",
-      "draft_qc": "PASSED",
-      "selection": "APPROVE",
-      "human_review": "APPROVED",
-      "approved_for_production": true
-    },
-    "P012": {
-      "status": "APPROVED",
-      "draft_qc": "PASSED",
-      "selection": "APPROVE",
-      "human_review": "APPROVED",
-      "approved_for_production": true
-    },
-    "P013": {
-      "status": "APPROVED",
-      "draft_qc": "PASSED",
-      "selection": "APPROVE",
-      "human_review": "APPROVED",
-      "approved_for_production": true
-    }
+    "P005": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "REVIEW", "human_review": "APPROVED", "approved_for_production": true},
+    "P006": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "REVIEW", "human_review": "APPROVED", "approved_for_production": true},
+    "P007": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
+    "P008": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "REVIEW", "human_review": "APPROVED", "approved_for_production": true},
+    "P009": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
+    "P010": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
+    "P011": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
+    "P012": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
+    "P013": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
+    "P014": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true}
   }
 }
