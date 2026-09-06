@@ -176,6 +176,25 @@ PRODUCT_PROFILES = {
             "Do not assume every phone, camera, tripod arrangement, or shooting environment will be equally stable or suitable."
         ),
     },
+    "cable_management": {
+        "keywords": ("cable", "management"),
+        "angle": "reducing visible cable clutter while keeping installation, access, and desk layout practical",
+        "fit": (
+            "A cable-management kit is worth evaluating when loose or exposed cables are a recurring desk problem and the included organizers match the cable routing and mounting surfaces in your workspace. "
+            "The useful question is whether the kit gives you the specific organizers and installation methods you need, not whether a larger piece count automatically means a better result."
+        ),
+        "sections": (
+            "which cable types and diameters the organizers can accommodate",
+            "desk dimensions and the routing path available underneath or behind the desk",
+            "adhesive, screw-fixed, and other installation methods supplied by the seller",
+            "number and type of sleeves, clips, ties, and holders included",
+            "whether installation remains accessible for future cable changes",
+        ),
+        "tradeoffs": (
+            "A large cable-management kit can provide flexibility, but unused pieces can become another small collection to store. "
+            "Adhesive mounts also depend on the surface and installation conditions, so check the seller's instructions and treat adhesive strength or residue-free removal as product-specific questions rather than guarantees."
+        ),
+    },
 }
 
 
