@@ -2,6 +2,9 @@ name: Test Amazon Desk Setup Automation
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -26,6 +29,9 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
+
+      - name: Run profile inference regression tests
+        run: python -m unittest tests/test_profile_inference.py -v
 
       - name: Evaluate intelligent candidate
         run: python test_intelligent_selection.py
