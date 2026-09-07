@@ -284,10 +284,13 @@ def infer_profile(product):
     normalized = re.sub(r"[^a-z0-9]+", " ", product["product_name"].lower()).split()
     tokens = set(normalized)
 
-    # Physical-product signals outrank incidental accessory terms. A monitor riser
-    # with "keyboard storage" is still a desk shelf/riser, not a keyboard.
+    # Physical-product signals outrank incidental accessory terms. These checks
+    # must run before broad single-keyword profiles so descriptive phrases such
+    # as "keyboard desk" cannot reclassify a desk mat as a keyboard.
     if {"shelf", "riser"} & tokens:
         return "desk_shelf", PRODUCT_PROFILES["desk_shelf"]
+    if "mat" in tokens:
+        return "desk_mat", PRODUCT_PROFILES["desk_mat"]
 
     for profile_name, profile in PRODUCT_PROFILES.items():
         if profile_name == "keyboard" and {"keyboard", "storage"}.issubset(tokens):
