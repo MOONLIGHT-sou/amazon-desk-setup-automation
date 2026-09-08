@@ -2,6 +2,13 @@ name: Auto Production Dispatcher
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "products.csv"
+      - "review_state.json"
+      - "product_facts.json"
+      - "selection_evidence.json"
+      - ".github/workflows/auto-production-dispatch.yml"
   schedule:
     - cron: "17 */6 * * *"
 
