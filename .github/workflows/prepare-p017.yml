@@ -59,7 +59,6 @@ jobs:
               text = text.replace(marker, profile + marker, 1)
               main_path.write_text(text, encoding='utf-8')
 
-          rows = []
           with Path('products.csv').open(newline='', encoding='utf-8') as f:
               rows = list(csv.DictReader(f))
           if not any(r['product_id'] == 'P017' for r in rows):
@@ -115,6 +114,7 @@ jobs:
               assert 'as an amazon associate i earn from qualifying purchases.' in lower
           PY
 
+          python -m pip install --disable-pip-version-check pytest
           python -m pytest -q tests/test_p017_profile.py
           python -m py_compile main.py
           python - <<'PY'
