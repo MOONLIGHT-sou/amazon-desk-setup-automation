@@ -176,6 +176,25 @@ PRODUCT_PROFILES = {
             "Do not assume every phone, camera, tripod arrangement, or shooting environment will be equally stable or suitable."
         ),
     },
+    "laptop_stand": {
+        "keywords": ("laptop", "stand"),
+        "angle": "raising a laptop off the desk while keeping footprint, viewing position, and portability practical",
+        "fit": (
+            "A laptop stand is worth evaluating when you want a dedicated raised platform and the listed dimensions, "
+            "laptop-size guidance, and folding or adjustment design fit your workspace."
+        ),
+        "sections": (
+            "listed dimensions and available desk space",
+            "laptop-size or compatibility information supplied by the seller",
+            "height and angle adjustment details stated by the seller",
+            "folding or portability requirements",
+            "whether the stand leaves enough room for the keyboard, mouse, and other desk items",
+        ),
+        "tradeoffs": (
+            "A raised laptop position can change viewing height and desk layout, but the right setup depends on the laptop, "
+            "desk dimensions, and the seller's stated adjustment range. Do not promise posture improvement, cooling gains, or universal compatibility."
+        ),
+    },
     "cable_management": {
         "keywords": ("cable", "management"),
         "angle": "reducing visible cable clutter while keeping installation, access, and desk layout practical",
