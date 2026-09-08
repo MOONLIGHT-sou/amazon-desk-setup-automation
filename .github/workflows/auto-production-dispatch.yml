@@ -1,0 +1,86 @@
+name: Auto Production Dispatcher
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: amazon-desk-setup-auto-production-dispatch
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    name: Dispatch next approved product
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+
+      - name: Resolve first-unused approved target
+        id: target
+        shell: python
+        run: |
+          import csv
+          import json
+          import os
+
+          with open("products.csv", newline="", encoding="utf-8") as file:
+              rows = list(csv.DictReader(file))
+
+          target = next((row for row in rows if row["used"].strip().lower() == "no"), None)
+          if target is None:
+              print("No unused product exists. Safe stop: nothing to dispatch.")
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+                  output.write("dispatch=false\n")
+              raise SystemExit(0)
+
+          target_id = target["product_id"].strip()
+          try:
+              with open("review_state.json", encoding="utf-8") as file:
+                  state = json.load(file)
+              review = state["products"][target_id]
+          except (OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
+              print(f"Safe stop: review authorization unavailable for {target_id}: {exc}")
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+                  output.write("dispatch=false\n")
+              raise SystemExit(0)
+
+          if review.get("status") != "APPROVED" or review.get("approved_for_production") is not True or review.get("draft_qc") != "PASSED":
+              print(f"Safe stop: {target_id} is not fully approved for production.")
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+                  output.write("dispatch=false\n")
+              raise SystemExit(0)
+
+          print(f"Approved first-unused target: {target_id} — {target['product_name']}")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write("dispatch=true\n")
+              output.write(f"target={target_id}\n")
+
+      - name: Dispatch production workflow
+        if: steps.target.outputs.dispatch == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_PRODUCT_ID: ${{ steps.target.outputs.target }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${REPOSITORY}/actions/workflows/production.yml/dispatches" \
+            -d "$(python - <<'PY'
+          import json, os
+          print(json.dumps({"ref": "main", "inputs": {"target_product_id": os.environ["TARGET_PRODUCT_ID"]}}))
+          PY
+          )"
+          echo "Production workflow dispatch requested for ${TARGET_PRODUCT_ID}."
