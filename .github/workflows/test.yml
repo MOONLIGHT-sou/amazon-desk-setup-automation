@@ -30,6 +30,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Validate P017-P050 candidate queue
+        run: python -m unittest tests/test_candidate_queue.py -v
+
       - name: Run profile inference regression tests
         run: python -m unittest tests/test_profile_inference.py -v
 
