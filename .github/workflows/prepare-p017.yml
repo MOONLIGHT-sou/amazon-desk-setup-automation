@@ -1,0 +1,208 @@
+name: Prepare P017 Safely
+
+on:
+  push:
+    paths:
+      - '.github/workflows/prepare-p017.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact triggering commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Prepare P017 and run deterministic preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv
+          import json
+          from pathlib import Path
+
+          main_path = Path('main.py')
+          text = main_path.read_text(encoding='utf-8')
+          marker = '    "cable_management": {'
+          if '"laptop_stand": {' not in text:
+              profile = '''    "laptop_stand": {
+                  "keywords": ("laptop", "stand"),
+                  "angle": "raising a laptop off the desk while keeping footprint, viewing position, and portability practical",
+                  "fit": (
+                      "A laptop stand is worth evaluating when you want a dedicated raised platform and the listed dimensions, "
+                      "laptop-size guidance, and folding or adjustment design fit your workspace."
+                  ),
+                  "sections": (
+                      "listed dimensions and available desk space",
+                      "laptop-size or compatibility information supplied by the seller",
+                      "height and angle adjustment details stated by the seller",
+                      "folding or portability requirements",
+                      "whether the stand leaves enough room for the keyboard, mouse, and other desk items",
+                  ),
+                  "tradeoffs": (
+                      "A raised laptop position can change viewing height and desk layout, but the right setup depends on the laptop, "
+                      "desk dimensions, and the seller's stated adjustment range. Do not promise posture improvement, cooling gains, or universal compatibility."
+                  ),
+              },
+          '''
+              if marker not in text:
+                  raise SystemExit('Profile insertion marker not found; refusing to modify main.py')
+              text = text.replace(marker, profile + marker, 1)
+              main_path.write_text(text, encoding='utf-8')
+
+          rows = []
+          with Path('products.csv').open(newline='', encoding='utf-8') as f:
+              rows = list(csv.DictReader(f))
+          if not any(r['product_id'] == 'P017' for r in rows):
+              rows.append({
+                  'product_id':'P017',
+                  'product_name':'Portronics My Buddy K Portable Laptop Stand, Grey',
+                  'category':'Minimal Desk Setup',
+                  'amazon_link':'https://www.amazon.in/dp/B00EU6TXC6?tag=moonlight0adc-21',
+                  'used':'No',
+              })
+              with Path('products.csv').open('w', newline='', encoding='utf-8') as f:
+                  w = csv.DictWriter(f, fieldnames=['product_id','product_name','category','amazon_link','used'])
+                  w.writeheader(); w.writerows(rows)
+
+          facts_path = Path('product_facts.json')
+          facts = json.loads(facts_path.read_text(encoding='utf-8'))
+          facts.setdefault('facts', {})['P017'] = {
+              'product_name':'Portronics My Buddy K Portable Laptop Stand with Adjustable Height, Foldable, OverHeating Protection for Laptops & MacBooks (Grey)',
+              'variant':'Grey',
+              'asin':'B00EU6TXC6',
+              'category':'Minimal Desk Setup',
+              'amazon_link':'https://www.amazon.in/dp/B00EU6TXC6?tag=moonlight0adc-21',
+              'verified_on':'2026-09-08',
+              'verification_method':'Current Amazon.in-tracked PriceHistory record with exact ASIN/title/brand/model/dimensions, corroborated by an exact-ASIN product record and current review evidence.',
+              'safe_facts':[
+                  'Portronics My Buddy K Portable Laptop Stand',
+                  'Grey variant',
+                  'Model My Buddy K',
+                  'Foldable laptop stand',
+                  'Adjustable height/angle design',
+                  'Aluminium and silicone construction as stated in product records',
+                  '24 x 16 x 5.5 cm listed dimensions',
+                  '270 g listed weight',
+                  'Tabletop mounting',
+                  'Laptop use',
+                  'Supports up to 17-inch and smaller laptops as stated in product records',
+                  '1-year manufacturer warranty stated in product records'
+              ],
+              'do_not_claim_as_current_fact':[
+                  'Current price','Current availability','Exact number of adjustment levels/angles because sources conflict',
+                  'Guaranteed posture improvement','Guaranteed cooling/overheating reduction','Guaranteed stability',
+                  'Guaranteed durability','Guaranteed compatibility with every laptop'
+              ],
+              'editorial_note':'Do not store or publish current price/availability as durable facts. Exact adjustment-count claims are intentionally excluded because sources conflict.'
+          }
+          facts_path.write_text(json.dumps(facts, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+
+          evidence_path = Path('selection_evidence.json')
+          evidence = json.loads(evidence_path.read_text(encoding='utf-8'))
+          evidence.setdefault('products', {})['P017'] = {
+              'identity': {
+                  'asin':'B00EU6TXC6',
+                  'product_name':'Portronics My Buddy K Portable Laptop Stand with Adjustable Height, Foldable, OverHeating Protection for Laptops & MacBooks (Grey)',
+                  'variant':'Grey',
+                  'verified_on':'2026-09-08',
+                  'confidence':'HIGH',
+                  'source_note':'Current Amazon.in-tracked PriceHistory record with exact ASIN/title/brand/model/dimensions, corroborated by an exact-ASIN product record.'
+              },
+              'selection': {
+                  'historical_demand_daily_units':175,
+                  'demand_source':'PowerLaw Amazon India Notebook Computer Stands demand report dated 2024-02-14',
+                  'demand_is_current':False,
+                  'niche_fit':'HIGH',
+                  'fact_verifiability':'HIGH',
+                  'content_potential':'HIGH'
+              },
+              'review_evidence': {
+                  'positive_themes':['compact','sturdy','easy to carry','multiple height adjustments','non-slip','good value'],
+                  'limitations':['one reviewer reported a short front lip'],
+                  'source_note':'Exact-ASIN review excerpts from 2026 product records; themes are evidence only, not guarantees.'
+              },
+              'current_listing_status':'VERIFIED_IDENTITY',
+              'current_price_recorded':False,
+              'promotion_gate':'REQUIRES_DETERMINISTIC_QC_AND_HUMAN_REVIEW'
+          }
+          evidence_path.write_text(json.dumps(evidence, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+
+          review_path = Path('review_state.json')
+          review = json.loads(review_path.read_text(encoding='utf-8'))
+          review.setdefault('products', {})['P017'] = {
+              'status':'REVIEW',
+              'draft_qc':'PENDING',
+              'selection':'REVIEW',
+              'human_review':'PENDING',
+              'approved_for_production':False
+          }
+          review_path.write_text(json.dumps(review, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+          PY
+
+          cat > tests/test_p017_profile.py <<'PY'
+          import json
+          from pathlib import Path
+          import main
+
+          def test_p017_is_first_unused_and_has_facts():
+              products = main.load_products()
+              p017 = next(p for p in products if p['product_id'] == 'P017')
+              assert p017['used'] == 'No'
+              assert products[0]['used'] == 'Yes'
+              facts = json.loads(Path('product_facts.json').read_text())['facts']['P017']
+              assert facts['asin'] == 'B00EU6TXC6'
+              assert 'Current price' in facts['do_not_claim_as_current_fact']
+
+          def test_p017_uses_laptop_stand_profile():
+              products = main.load_products()
+              p017 = next(p for p in products if p['product_id'] == 'P017')
+              profile_name, _ = main.infer_profile(p017)
+              assert profile_name == 'laptop_stand'
+
+          def test_p017_content_generation_is_safe():
+              products = main.load_products()
+              p017 = next(p for p in products if p['product_id'] == 'P017')
+              content = main.build_content(p017)
+              text = '\n'.join(str(v) for v in content.values()) if isinstance(content, dict) else str(content)
+              lower = text.lower()
+              assert 'current price' not in lower
+              assert 'guaranteed posture improvement' not in lower
+              assert 'i tested' not in lower
+              assert 'as an amazon associate i earn from qualifying purchases.' in lower
+          PY
+
+          python -m pytest -q tests/test_p017_profile.py
+          python -m py_compile main.py
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          review=json.loads(Path('review_state.json').read_text())['products']['P017']
+          assert review['approved_for_production'] is False
+          assert review['draft_qc'] == 'PENDING'
+          print('P017 preflight complete: prepared but NOT authorized for production.')
+          PY
+
+      - name: Commit safe preparation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add main.py products.csv product_facts.json selection_evidence.json review_state.json tests/test_p017_profile.py
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo 'No changes required.'
+            exit 0
+          fi
+          git commit -m 'feat: prepare P017 laptop stand for review'
+          git push origin HEAD:main
