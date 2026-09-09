@@ -1,0 +1,97 @@
+name: Queue Health and Refill Gate
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "47 */6 * * *"
+  push:
+    paths:
+      - products.csv
+      - candidate_queue.json
+      - candidate_listing_qc.json
+      - review_state.json
+      - .github/workflows/queue-health.yml
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: amazon-desk-setup-queue-health
+  cancel-in-progress: true
+
+env:
+  REFILL_THRESHOLD: "5"
+  LISTING_QC_MAX_AGE_DAYS: "14"
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Evaluate production queue
+        id: health
+        shell: python
+        run: |
+          import csv, json, os, re
+          from datetime import date
+          from pathlib import Path
+          rows = list(csv.DictReader(Path("products.csv").open(newline="", encoding="utf-8")))
+          evidence = json.loads(Path("selection_evidence.json").read_text(encoding="utf-8"))["products"]
+          unused = [r for r in rows if r["used"].strip().lower() == "no"]
+          max_age = int(os.environ["LISTING_QC_MAX_AGE_DAYS"])
+          eligible = []
+          stale = []
+          for r in unused:
+              qc = evidence.get(r["product_id"], {}).get("current_listing_qc", {})
+              match = re.search(r"crawled\s+(\d{4}-\d{2}-\d{2})", qc.get("freshness", ""), re.I)
+              age = None if not match else (date.today() - date.fromisoformat(match.group(1))).days
+              if qc.get("status") == "PASSED" and age is not None and 0 <= age <= max_age:
+                  eligible.append(r["product_id"])
+              else:
+                  stale.append(r["product_id"])
+          threshold = int(os.environ["REFILL_THRESHOLD"])
+          needs = len(eligible) < threshold
+          print(f"Unused={len(unused)} fresh-eligible={len(eligible)} stale-or-blocked={','.join(stale) or 'none'}")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              out.write(f"needs_refill={'true' if needs else 'false'}\n")
+              out.write(f"eligible={','.join(eligible)}\n")
+              out.write(f"stale={','.join(stale)}\n")
+      - name: Open or refresh refill work order
+        if: steps.health.outputs.needs_refill == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ELIGIBLE: ${{ steps.health.outputs.eligible }}
+          STALE: ${{ steps.health.outputs.stale }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TITLE="Production queue refill required"
+          BODY=$(cat <<EOF
+          ## Queue refill required
+
+          The safety-gated production queue has fewer than ${REFILL_THRESHOLD} fresh eligible unused products.
+
+          Fresh eligible IDs: ${ELIGIBLE:-none}
+          Stale/blocked IDs: ${STALE:-none}
+
+          ### Refill contract
+          1. Add new candidates to \`candidate_queue.json\` with exact ASIN, title, variant, profile, category and historical demand evidence.
+          2. Add independent current-listing evidence to \`candidate_listing_qc.json\`.
+          3. Evidence must be no more than ${LISTING_QC_MAX_AGE_DAYS} days old and the exact ASIN must match.
+          4. Batch promotion may then add only fresh QC-passed candidates to \`products.csv\`.
+          5. Production independently rechecks the same freshness/ASIN gate before consuming a product.
+
+          Do not manually mark products as used and do not bypass the QC gate.
+          EOF
+          )
+          EXISTING=$(gh issue list --state open --search "${TITLE} in:title" --json number --jq '.[0].number' || true)
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "$BODY"
+          else
+            gh issue create --title "$TITLE" --body "$BODY"
+          fi
+      - name: Safe stop when refill is needed
+        if: steps.health.outputs.needs_refill == 'true'
+        run: echo "Queue health gate: REFILL REQUIRED; no production bypass is permitted."
