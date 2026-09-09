@@ -8,6 +8,7 @@ on:
       - "review_state.json"
       - "product_facts.json"
       - "selection_evidence.json"
+      - "candidate_selector.py"
       - ".github/workflows/auto-production-dispatch.yml"
   schedule:
     - cron: "17 */6 * * *"
