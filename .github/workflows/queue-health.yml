@@ -15,7 +15,6 @@ on:
 permissions:
   contents: read
   issues: write
-  actions: write
 
 concurrency:
   group: amazon-desk-setup-queue-health
@@ -59,22 +58,6 @@ jobs:
               out.write(f"needs_refill={'true' if needs else 'false'}\n")
               out.write(f"eligible={','.join(eligible)}\n")
               out.write(f"stale={','.join(stale)}\n")
-      - name: Request automatic batch promotion/refill
-        if: steps.health.outputs.needs_refill == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPOSITORY: ${{ github.repository }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl --fail-with-body --silent --show-error \
-            -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${REPOSITORY}/actions/workflows/batch-candidate-promotion.yml/dispatches" \
-            -d '{"ref":"main"}'
-          echo "Automatic batch promotion/refill requested."
       - name: Open or refresh refill work order
         if: steps.health.outputs.needs_refill == 'true'
         env:
@@ -88,16 +71,16 @@ jobs:
           BODY=$(cat <<EOF
           ## Queue refill required
 
-          The safety-gated production queue has fewer than ${REFILL_THRESHOLD} fresh eligible unused products. The automatic batch-promotion workflow was dispatched first so any already-queued fresh candidates can be promoted without manual shepherding.
+          The safety-gated production queue has fewer than ${REFILL_THRESHOLD} fresh eligible unused products.
 
           Fresh eligible IDs: ${ELIGIBLE:-none}
           Stale/blocked IDs: ${STALE:-none}
 
           ### Refill contract
-          1. Add new candidates to `candidate_queue.json` with exact ASIN, title, variant, profile, category and historical demand evidence.
-          2. Add independent current-listing evidence to `candidate_listing_qc.json`.
+          1. Add new candidates to \`candidate_queue.json\` with exact ASIN, title, variant, profile, category and historical demand evidence.
+          2. Add independent current-listing evidence to \`candidate_listing_qc.json\`.
           3. Evidence must be no more than ${LISTING_QC_MAX_AGE_DAYS} days old and the exact ASIN must match.
-          4. Batch promotion may then add only fresh QC-passed candidates to `products.csv`.
+          4. Batch promotion may then add only fresh QC-passed candidates to \`products.csv\`.
           5. Production independently rechecks the same freshness/ASIN gate before consuming a product.
 
           Do not manually mark products as used and do not bypass the QC gate.
@@ -111,4 +94,4 @@ jobs:
           fi
       - name: Safe stop when refill is needed
         if: steps.health.outputs.needs_refill == 'true'
-        run: echo "Queue health gate: REFILL REQUIRED; production itself remains safety-gated and will not bypass missing fresh QC."
+        run: echo "Queue health gate: REFILL REQUIRED; no production bypass is permitted."
