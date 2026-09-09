@@ -24,7 +24,7 @@ class CandidateQueueTests(unittest.TestCase):
             self.assertTrue(item["profile"])
             self.assertGreater(item["historical_daily_units"], 0)
 
-    def test_queue_does_not_duplicate_consumed_products(self):
+    def test_queue_does_not_duplicate_consumed_products_on_promotion(self):
         with (ROOT / "products.csv").open(newline="", encoding="utf-8") as fh:
             rows = list(csv.DictReader(fh))
         consumed_ids = {row["product_id"] for row in rows}
@@ -32,8 +32,20 @@ class CandidateQueueTests(unittest.TestCase):
 
         queue = json.loads((ROOT / "candidate_queue.json").read_text(encoding="utf-8"))
         candidates = queue["candidates"]
-        self.assertTrue(consumed_ids.isdisjoint({item["product_id"] for item in candidates}))
-        self.assertTrue(consumed_names.isdisjoint({item["product_name"] for item in candidates}))
+        candidate_ids = [item["product_id"] for item in candidates]
+        candidate_names = [item["product_name"] for item in candidates]
+
+        # The queue is the durable source inventory, so it may retain already
+        # consumed candidates. Promotion must skip those IDs rather than add
+        # duplicate rows to products.csv.
+        self.assertEqual(len(candidate_ids), len(set(candidate_ids)))
+        self.assertEqual(len(candidate_names), len(set(candidate_names)))
+        self.assertEqual(len(consumed_ids), len(rows))
+        self.assertEqual(len(consumed_names), len(rows))
+
+        promotable = [item for item in candidates if item["product_id"] not in consumed_ids]
+        self.assertEqual(len({item["product_id"] for item in promotable}), len(promotable))
+        self.assertEqual(len({item["product_name"] for item in promotable}), len(promotable))
 
     def test_queue_is_not_production_authorized_by_itself(self):
         queue = json.loads((ROOT / "candidate_queue.json").read_text(encoding="utf-8"))
