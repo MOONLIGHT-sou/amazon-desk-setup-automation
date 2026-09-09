@@ -899,6 +899,60 @@
       "current_listing_status": "VERIFIED_IDENTITY",
       "current_price_recorded": false,
       "promotion_gate": "REQUIRES_DETERMINISTIC_QC_AND_HUMAN_REVIEW"
+    },
+    "P018": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B09B4G243Y",
+        "variant": "Steel Grey",
+        "verified_on": "2026-09-09",
+        "source": "Current Amazon.in-linked PriceHistory record; exact ASIN independently matched to PowerLaw selection report"
+      },
+      "demand": {
+        "score": 85,
+        "confidence": "medium",
+        "value": "107 historical daily units",
+        "verified_on": "2026-09-09",
+        "source": "PowerLaw Analytics Amazon India Notebook Computer Stands demand report"
+      },
+      "review_volume": {
+        "score": 95,
+        "confidence": "high",
+        "value": 5516,
+        "verified_on": "2026-09-09",
+        "source": "Current Amazon.in-linked PriceHistory product record"
+      },
+      "rating_context": {
+        "score": 84,
+        "confidence": "high",
+        "rating": 8.4,
+        "review_count": 5516,
+        "verified_on": "2026-09-09",
+        "source": "Current Amazon.in-linked PriceHistory product record"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured",
+        "reason": "A reliable product-specific review count is available, but review-theme excerpts were not independently captured; content must not invent or generalize customer experiences."
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high",
+        "reason": "The exact product is a foldable, height-adjustable laptop stand and is directly relevant to a minimal laptop-centered desk setup."
+      },
+      "fact_verifiability": {
+        "score": 95,
+        "confidence": "high",
+        "verified_on": "2026-09-09",
+        "source": "Current Amazon.in-linked PriceHistory record with exact ASIN, title, model and dimensions"
+      },
+      "content_potential": {
+        "score": 85,
+        "confidence": "medium",
+        "reason": "The product has concrete fit, footprint, folding and adjustment attributes that support a buyer-focused decision guide without unsupported performance promises."
+      }
     }
   }
 }
