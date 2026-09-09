@@ -1002,6 +1002,1202 @@
         "confidence": "medium",
         "reason": "Six-angle adjustment, foldability, aluminum construction and compact tabletop use provide concrete desk-setup content angles without requiring performance guarantees."
       }
+    },
+    "P020": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B0CGRN291M",
+        "variant": "NS3000",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/zebronics-ns3000-portable-laptop-tablet-stand-supports-XLNXmjmb"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B0CGRN291M",
+        "source": "https://pricehistory.app/p/zebronics-ns3000-portable-laptop-tablet-stand-supports-XLNXmjmb",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-09-05"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "91 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P021": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B0BSXDGL49",
+        "variant": "Aluminium Alloy, Silver",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/amazon-basics-laptop-stand-height-adjustable-foldable-VvEL4xyp"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B0BSXDGL49",
+        "source": "https://pricehistory.app/p/amazon-basics-laptop-stand-height-adjustable-foldable-VvEL4xyp",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-09-09"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "81 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P022": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B08WJ2HN87",
+        "variant": "Black",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/gizga-essentials-laptop-stand-riser-12-15-HLlz3vyp"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B08WJ2HN87",
+        "source": "https://pricehistory.app/p/gizga-essentials-laptop-stand-riser-12-15-HLlz3vyp",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-09-09"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "78 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P023": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B08YDB1FLC",
+        "variant": "Blue",
+        "verified_on": "2026-09-09",
+        "source": "https://lebanon.desertcart.com/products/339461582-tarkan-portable-folding-laptop-desk-for-bed-lapdesk-with-handle"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B08YDB1FLC",
+        "source": "https://lebanon.desertcart.com/products/339461582-tarkan-portable-folding-laptop-desk-for-bed-lapdesk-with-handle",
+        "source_type": "Amazon-linked product record",
+        "freshness": "crawled 2026-09-09"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "75 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P024": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B0C5D9VS1L",
+        "variant": "Silver",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/smashtronics-adjustable-aluminum-laptop-stand-foldable-ventilated-7UVK1Ayp"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B0C5D9VS1L",
+        "source": "https://pricehistory.app/p/smashtronics-adjustable-aluminum-laptop-stand-foldable-ventilated-7UVK1Ayp",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-07-09"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "72 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P025": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B07XCP3GRX",
+        "variant": "White",
+        "verified_on": "2026-09-09",
+        "source": "https://maldives.desertcart.com/products/161746936-striff-adjustable-laptop-stand-patented-riser-ventilated-portable-foldable-compatible"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B07XCP3GRX",
+        "source": "https://maldives.desertcart.com/products/161746936-striff-adjustable-laptop-stand-patented-riser-ventilated-portable-foldable-compatible",
+        "source_type": "Amazon-linked product record",
+        "freshness": "crawled 2026-08-26"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "72 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P026": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B08YD264ZS",
+        "variant": "Black",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/tarkan-portable-folding-laptop-desk-bed-lapdesk-RRujIk2h"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B08YD264ZS",
+        "source": "https://pricehistory.app/p/tarkan-portable-folding-laptop-desk-bed-lapdesk-RRujIk2h",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-09-09"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "70 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P029": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B09KC259VF",
+        "variant": "Black",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/portronics-my-buddy-portable-foldable-laptop-table-H2VdOaw8"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B09KC259VF",
+        "source": "https://pricehistory.app/p/portronics-my-buddy-portable-foldable-laptop-table-H2VdOaw8",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-09-01"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "67 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P030": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B099ZXYCWP",
+        "variant": "Black",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/dyazo-6-angle-foldable-portable-laptop-riser-IJOE3vyp"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B099ZXYCWP",
+        "source": "https://pricehistory.app/p/dyazo-6-angle-foldable-portable-laptop-riser-IJOE3vyp",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-09-09"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "66 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P031": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B0BR3R6W9P",
+        "variant": "Grey",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/portronics-my-buddy-j-portable-foldable-laptop-6K8Zpew8"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B0BR3R6W9P",
+        "source": "https://pricehistory.app/p/portronics-my-buddy-j-portable-foldable-laptop-6K8Zpew8",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-09-03"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "64 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P032": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B08WKCTFF3",
+        "variant": "Dark Grey / Zeb-NS2000",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/zebronics-aluminium-alloy-laptop-stand-compatible-9-b7a4aoSj"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B08WKCTFF3",
+        "source": "https://pricehistory.app/p/zebronics-aluminium-alloy-laptop-stand-compatible-9-b7a4aoSj",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-09-07"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "63 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P033": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B09T6HKZD5",
+        "variant": "Silver",
+        "verified_on": "2026-09-09",
+        "source": "https://suriname.desertcart.com/products/422104677-sounce-laptop-stand-fold-up-adjustable-ventilated-portable-laptop-holder"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B09T6HKZD5",
+        "source": "https://suriname.desertcart.com/products/422104677-sounce-laptop-stand-fold-up-adjustable-ventilated-portable-laptop-holder",
+        "source_type": "Amazon-linked product record",
+        "freshness": "crawled 2026-08-01"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "52 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P034": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B08VK11P24",
+        "variant": "Space Grey",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/dyazo-zigzag-height-adjustable-ventilated-aluminium-tabletop-xhV0aoSj"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B08VK11P24",
+        "source": "https://pricehistory.app/p/dyazo-zigzag-height-adjustable-ventilated-aluminium-tabletop-xhV0aoSj",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-09-09"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "51 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P036": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B08PFSZ7FH",
+        "variant": "Black",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/striff-laptop-stand-adjustable-laptop-computer-stand-wVHOOdmb"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B08PFSZ7FH",
+        "source": "https://pricehistory.app/p/striff-laptop-stand-adjustable-laptop-computer-stand-wVHOOdmb",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-09-09"
+      },
+      "demand": {
+        "score": 95,
+        "confidence": "medium",
+        "value": "47 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P038": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B08L9467DT",
+        "variant": "Grey",
+        "verified_on": "2026-09-09",
+        "source": "https://angola.desertcart.com/products/273436190-tukzer-imported-foldable-laptop-stand-riser-for-laptop-macbook-notebook"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B08L9467DT",
+        "source": "https://angola.desertcart.com/products/273436190-tukzer-imported-foldable-laptop-stand-riser-for-laptop-macbook-notebook",
+        "source_type": "Amazon-linked product record",
+        "freshness": "crawled 2026-09-04"
+      },
+      "demand": {
+        "score": 90,
+        "confidence": "medium",
+        "value": "40 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P039": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B08R78CSZ5",
+        "variant": "Silver",
+        "verified_on": "2026-09-09",
+        "source": "https://sastelaptops.com/product/plixio-laptop-standadjustable-laptop-standaluminum-laptop-standsergonomic-laptop-stands-compatible-with-macbook-air-prolenovo-more-10-15-6-laptops-silver/"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B08R78CSZ5",
+        "source": "https://sastelaptops.com/product/plixio-laptop-standadjustable-laptop-standaluminum-laptop-standsergonomic-laptop-stands-compatible-with-macbook-air-prolenovo-more-10-15-6-laptops-silver/",
+        "source_type": "Amazon-linked product record",
+        "freshness": "crawled 2026-08-09"
+      },
+      "demand": {
+        "score": 89,
+        "confidence": "medium",
+        "value": "39 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P040": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B0BVR9RCYW",
+        "variant": "Silver",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/dyazo-7-angle-aluminum-laptop-stand-portable-WjtvNo2h"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B0BVR9RCYW",
+        "source": "https://pricehistory.app/p/dyazo-7-angle-aluminum-laptop-stand-portable-WjtvNo2h",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-09-02"
+      },
+      "demand": {
+        "score": 86,
+        "confidence": "medium",
+        "value": "36 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P042": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B08KHHV4KV",
+        "variant": "Black",
+        "verified_on": "2026-09-09",
+        "source": "https://www.merchantwords.com/page1products/in/tukzer%20laptop%20stand"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B08KHHV4KV",
+        "source": "https://www.merchantwords.com/page1products/in/tukzer%20laptop%20stand",
+        "source_type": "Amazon India product index",
+        "freshness": "crawled 2026-09-09"
+      },
+      "demand": {
+        "score": 83,
+        "confidence": "medium",
+        "value": "33 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P043": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B0C8MQCWHT",
+        "variant": "Silver",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/amazon-basics-double-layer-laptop-stand-7x9-8sSzF8Q2"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B0C8MQCWHT",
+        "source": "https://pricehistory.app/p/amazon-basics-double-layer-laptop-stand-7x9-8sSzF8Q2",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-09-08"
+      },
+      "demand": {
+        "score": 79,
+        "confidence": "medium",
+        "value": "29 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P044": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B08LKJVN1T",
+        "variant": "Black",
+        "verified_on": "2026-09-09",
+        "source": "https://pricehistory.app/p/portronics-my-buddy-hexa-22-adjustable-tabletop-f2xrBrIm"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B08LKJVN1T",
+        "source": "https://pricehistory.app/p/portronics-my-buddy-hexa-22-adjustable-tabletop-f2xrBrIm",
+        "source_type": "Amazon.in product tracking record",
+        "freshness": "crawled 2026-06-09"
+      },
+      "demand": {
+        "score": 78,
+        "confidence": "medium",
+        "value": "28 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P045": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B09LCY4M26",
+        "variant": "Black, VERTCL-Lap-STD-SML",
+        "verified_on": "2026-09-09",
+        "source": "https://www.desertcart.in/products/390401568-elv-direct-tabletop-vertical-laptop-stand-holder-desktop-aluminum-lapdesk"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B09LCY4M26",
+        "source": "https://www.desertcart.in/products/390401568-elv-direct-tabletop-vertical-laptop-stand-holder-desktop-aluminum-lapdesk",
+        "source_type": "Amazon-linked product record",
+        "freshness": "crawled 2026-08-26"
+      },
+      "demand": {
+        "score": 78,
+        "confidence": "medium",
+        "value": "28 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P049": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B0C5DSHNRD",
+        "variant": "Kickstand",
+        "verified_on": "2026-09-09",
+        "source": "https://www.indianconstructionindustry.com/amazon_store/indian_furniture/Smashtronics-Premium-Metal-Laptop-Stand-B0C5DSHNRD.html"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B0C5DSHNRD",
+        "source": "https://www.indianconstructionindustry.com/amazon_store/indian_furniture/Smashtronics-Premium-Metal-Laptop-Stand-B0C5DSHNRD.html",
+        "source_type": "Amazon-linked product record",
+        "freshness": "crawled 2026-03-09"
+      },
+      "demand": {
+        "score": 70,
+        "confidence": "medium",
+        "value": "20 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
+    },
+    "P050": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B07MFYTT88",
+        "variant": "White",
+        "verified_on": "2026-09-09",
+        "source": "https://dealcliq.com/products/gizga-essentials-portable-laptop-stand-multi-functional-foldable-stand-for-laptop-macbook-ergonomic-design-anti-slip-base-heat-dissipation-multiple-angles-height-adjustable-light-weight-white"
+      },
+      "current_listing_qc": {
+        "status": "PASSED",
+        "asin": "B07MFYTT88",
+        "source": "https://dealcliq.com/products/gizga-essentials-portable-laptop-stand-multi-functional-foldable-stand-for-laptop-macbook-ergonomic-design-anti-slip-base-heat-dissipation-multiple-angles-height-adjustable-light-weight-white",
+        "source_type": "Amazon-linked product record",
+        "freshness": "crawled 2026-06-03"
+      },
+      "demand": {
+        "score": 69,
+        "confidence": "medium",
+        "value": "19 historical daily units",
+        "verified_on": "2024-02-14",
+        "source": "PowerLaw Analytics historical Amazon India demand report"
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high"
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium"
+      },
+      "selection_note": "Historical demand is selection evidence only; current price/availability are intentionally not asserted."
     }
   }
 }

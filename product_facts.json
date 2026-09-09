@@ -516,6 +516,558 @@
         "Guaranteed review sentiment"
       ],
       "editorial_note": "Use the live Amazon.in listing as the source of truth for current price, availability and listing details. Historical demand is selection evidence only, not a current-sales claim."
+    },
+    "P020": {
+      "product_name": "Zebronics NS3000 Portable Laptop & Tablet Stand, Foldable, Multi Angle, Carbon Steel Body",
+      "variant": "NS3000",
+      "asin": "B0CGRN291M",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B0CGRN291M?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Zebronics NS3000 Portable Laptop & Tablet Stand, Foldable, Multi Angle, Carbon Steel Body",
+        "NS3000",
+        "Minimal Desk Setup",
+        "Amazon ASIN B0CGRN291M",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P021": {
+      "product_name": "Amazon Basics Laptop Stand, Height-Adjustable, Foldable, Portable, Ventilated, Fits Up to 15.6-Inch Laptops (Aluminium Alloy, Silver)",
+      "variant": "Aluminium Alloy, Silver",
+      "asin": "B0BSXDGL49",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B0BSXDGL49?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Amazon Basics Laptop Stand, Height-Adjustable, Foldable, Portable, Ventilated, Fits Up to 15.6-Inch Laptops (Aluminium Alloy, Silver)",
+        "Aluminium Alloy, Silver",
+        "Minimal Desk Setup",
+        "Amazon ASIN B0BSXDGL49",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P022": {
+      "product_name": "GIZGA essentials 2 in 1 Laptop/Notebook/MacBook Tabletop Stand, 8-Adjustable Angles, Mobile Tabletop Stand, 12-15.6 Laptops (Black)",
+      "variant": "Black",
+      "asin": "B08WJ2HN87",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B08WJ2HN87?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "GIZGA essentials 2 in 1 Laptop/Notebook/MacBook Tabletop Stand, 8-Adjustable Angles, Mobile Tabletop Stand, 12-15.6 Laptops (Black)",
+        "Black",
+        "Minimal Desk Setup",
+        "Amazon ASIN B08WJ2HN87",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P023": {
+      "product_name": "Tarkan Portable Folding Laptop Desk for Bed, Lapdesk with Handle, Drawer, Cup & Mobile/Tablet Holder (Blue)",
+      "variant": "Blue",
+      "asin": "B08YDB1FLC",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B08YDB1FLC?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Tarkan Portable Folding Laptop Desk for Bed, Lapdesk with Handle, Drawer, Cup & Mobile/Tablet Holder (Blue)",
+        "Blue",
+        "Minimal Desk Setup",
+        "Amazon ASIN B08YDB1FLC",
+        "lap desk product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P024": {
+      "product_name": "Smashtronics Adjustable Aluminum Laptop Stand, Foldable, Ventilated, Portable, Compatible for 13-15 inch Laptops (Silver)",
+      "variant": "Silver",
+      "asin": "B0C5D9VS1L",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B0C5D9VS1L?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Smashtronics Adjustable Aluminum Laptop Stand, Foldable, Ventilated, Portable, Compatible for 13-15 inch Laptops (Silver)",
+        "Silver",
+        "Minimal Desk Setup",
+        "Amazon ASIN B0C5D9VS1L",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P025": {
+      "product_name": "STRIFF Adjustable Laptop Stand Patented Riser Ventilated Portable Foldable with Free Phone Stand (White)",
+      "variant": "White",
+      "asin": "B07XCP3GRX",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B07XCP3GRX?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "STRIFF Adjustable Laptop Stand Patented Riser Ventilated Portable Foldable with Free Phone Stand (White)",
+        "White",
+        "Minimal Desk Setup",
+        "Amazon ASIN B07XCP3GRX",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P026": {
+      "product_name": "Tarkan Portable Folding Laptop Desk for Bed, Lapdesk with Handle, Drawer, Cup & Mobile/Tablet Holder (Black)",
+      "variant": "Black",
+      "asin": "B08YD264ZS",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B08YD264ZS?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Tarkan Portable Folding Laptop Desk for Bed, Lapdesk with Handle, Drawer, Cup & Mobile/Tablet Holder (Black)",
+        "Black",
+        "Minimal Desk Setup",
+        "Amazon ASIN B08YD264ZS",
+        "lap desk product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P029": {
+      "product_name": "Portronics My Buddy Plus Adjustable Laptop Table with Built-in USB Cooling Fan (Black)",
+      "variant": "Black",
+      "asin": "B09KC259VF",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B09KC259VF?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Portronics My Buddy Plus Adjustable Laptop Table with Built-in USB Cooling Fan (Black)",
+        "Black",
+        "Minimal Desk Setup",
+        "Amazon ASIN B09KC259VF",
+        "lap desk product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P030": {
+      "product_name": "Dyazo 6 Angle Foldable & Portable Laptop Riser Stand, Aluminum Alloy (Black)",
+      "variant": "Black",
+      "asin": "B099ZXYCWP",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B099ZXYCWP?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Dyazo 6 Angle Foldable & Portable Laptop Riser Stand, Aluminum Alloy (Black)",
+        "Black",
+        "Minimal Desk Setup",
+        "Amazon ASIN B099ZXYCWP",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P031": {
+      "product_name": "Portronics My Buddy J Portable/Foldable Laptop Table with Laminated MDF Board and Aluminium Legs (Grey)",
+      "variant": "Grey",
+      "asin": "B0BR3R6W9P",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B0BR3R6W9P?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Portronics My Buddy J Portable/Foldable Laptop Table with Laminated MDF Board and Aluminium Legs (Grey)",
+        "Grey",
+        "Minimal Desk Setup",
+        "Amazon ASIN B0BR3R6W9P",
+        "lap desk product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P032": {
+      "product_name": "ZEBRONICS Aluminium Alloy Laptop Stand, 9-15.6 inch, 7 Angles, Zeb-NS2000 (Dark Grey)",
+      "variant": "Dark Grey / Zeb-NS2000",
+      "asin": "B08WKCTFF3",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B08WKCTFF3?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "ZEBRONICS Aluminium Alloy Laptop Stand, 9-15.6 inch, 7 Angles, Zeb-NS2000 (Dark Grey)",
+        "Dark Grey / Zeb-NS2000",
+        "Minimal Desk Setup",
+        "Amazon ASIN B08WKCTFF3",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P033": {
+      "product_name": "Sounce Laptop Stand, Fold-Up, Adjustable, Ventilated, Portable Aluminum (Silver)",
+      "variant": "Silver",
+      "asin": "B09T6HKZD5",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B09T6HKZD5?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Sounce Laptop Stand, Fold-Up, Adjustable, Ventilated, Portable Aluminum (Silver)",
+        "Silver",
+        "Minimal Desk Setup",
+        "Amazon ASIN B09T6HKZD5",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P034": {
+      "product_name": "Dyazo Zigzag Height Adjustable Ventilated Aluminium Tabletop Laptop Stand (Space Grey)",
+      "variant": "Space Grey",
+      "asin": "B08VK11P24",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B08VK11P24?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Dyazo Zigzag Height Adjustable Ventilated Aluminium Tabletop Laptop Stand (Space Grey)",
+        "Space Grey",
+        "Minimal Desk Setup",
+        "Amazon ASIN B08VK11P24",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P036": {
+      "product_name": "STRIFF Laptop Stand MacBook Stand, Adjustable Gaming Laptop Computer Stand, Phone Stand (Black)",
+      "variant": "Black",
+      "asin": "B08PFSZ7FH",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B08PFSZ7FH?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "STRIFF Laptop Stand MacBook Stand, Adjustable Gaming Laptop Computer Stand, Phone Stand (Black)",
+        "Black",
+        "Minimal Desk Setup",
+        "Amazon ASIN B08PFSZ7FH",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P038": {
+      "product_name": "Tukzer Foldable Laptop Stand Riser for Laptop, MacBook, Notebook & Tablets up to 17 Inch (Grey)",
+      "variant": "Grey",
+      "asin": "B08L9467DT",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B08L9467DT?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Tukzer Foldable Laptop Stand Riser for Laptop, MacBook, Notebook & Tablets up to 17 Inch (Grey)",
+        "Grey",
+        "Minimal Desk Setup",
+        "Amazon ASIN B08L9467DT",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P039": {
+      "product_name": "PLIXIO Aluminum Tabletop Laptop Stand Ergonomic Foldable Portable Stand (Silver)",
+      "variant": "Silver",
+      "asin": "B08R78CSZ5",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B08R78CSZ5?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "PLIXIO Aluminum Tabletop Laptop Stand Ergonomic Foldable Portable Stand (Silver)",
+        "Silver",
+        "Minimal Desk Setup",
+        "Amazon ASIN B08R78CSZ5",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P040": {
+      "product_name": "Dyazo 7 Angle Aluminum Laptop Stand, Portable & Fully Foldable (Silver)",
+      "variant": "Silver",
+      "asin": "B0BVR9RCYW",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B0BVR9RCYW?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Dyazo 7 Angle Aluminum Laptop Stand, Portable & Fully Foldable (Silver)",
+        "Silver",
+        "Minimal Desk Setup",
+        "Amazon ASIN B0BVR9RCYW",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P042": {
+      "product_name": "Tukzer Foldable Laptop & Tablet Stand Riser, Multi-Angle Adjustment (Black)",
+      "variant": "Black",
+      "asin": "B08KHHV4KV",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B08KHHV4KV?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Tukzer Foldable Laptop & Tablet Stand Riser, Multi-Angle Adjustment (Black)",
+        "Black",
+        "Minimal Desk Setup",
+        "Amazon ASIN B08KHHV4KV",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P043": {
+      "product_name": "Amazon Basics Double Layer Laptop Stand, Height & Angle Adjustable Aluminum Tabletop Riser (Silver)",
+      "variant": "Silver",
+      "asin": "B0C8MQCWHT",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B0C8MQCWHT?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Amazon Basics Double Layer Laptop Stand, Height & Angle Adjustable Aluminum Tabletop Riser (Silver)",
+        "Silver",
+        "Minimal Desk Setup",
+        "Amazon ASIN B0C8MQCWHT",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P044": {
+      "product_name": "Portronics My Buddy Hexa 22 Laptop Stand with 360° Rotation Base, Mobile Stand, 7 Adjustable Heights (Black)",
+      "variant": "Black",
+      "asin": "B08LKJVN1T",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B08LKJVN1T?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Portronics My Buddy Hexa 22 Laptop Stand with 360° Rotation Base, Mobile Stand, 7 Adjustable Heights (Black)",
+        "Black",
+        "Minimal Desk Setup",
+        "Amazon ASIN B08LKJVN1T",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P045": {
+      "product_name": "ELV Direct Tabletop Vertical Laptop Stand Holder, Adjustable Dock Size, Up to 17.3 inches (Black, Small)",
+      "variant": "Black, VERTCL-Lap-STD-SML",
+      "asin": "B09LCY4M26",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B09LCY4M26?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "ELV Direct Tabletop Vertical Laptop Stand Holder, Adjustable Dock Size, Up to 17.3 inches (Black, Small)",
+        "Black, VERTCL-Lap-STD-SML",
+        "Minimal Desk Setup",
+        "Amazon ASIN B09LCY4M26",
+        "vertical laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P049": {
+      "product_name": "Smashtronics Premium Metal Laptop Stand, Foldable, Height Adjustable Aluminum Stand (Kickstand)",
+      "variant": "Kickstand",
+      "asin": "B0C5DSHNRD",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B0C5DSHNRD?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "Smashtronics Premium Metal Laptop Stand, Foldable, Height Adjustable Aluminum Stand (Kickstand)",
+        "Kickstand",
+        "Minimal Desk Setup",
+        "Amazon ASIN B0C5DSHNRD",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
+    },
+    "P050": {
+      "product_name": "GIZGA essentials Portable Laptop Stand, Multi-Functional Foldable Stand, Multiple Angles, Height Adjustable (White)",
+      "variant": "White",
+      "asin": "B07MFYTT88",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B07MFYTT88?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.",
+      "safe_facts": [
+        "GIZGA essentials Portable Laptop Stand, Multi-Functional Foldable Stand, Multiple Angles, Height Adjustable (White)",
+        "White",
+        "Minimal Desk Setup",
+        "Amazon ASIN B07MFYTT88",
+        "laptop stand product"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current price",
+        "Current availability",
+        "Unverified dimensions",
+        "Unverified compatibility beyond the listing",
+        "Guaranteed performance, comfort, durability, cooling, or productivity benefits"
+      ],
+      "editorial_note": "Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only."
     }
   }
 }

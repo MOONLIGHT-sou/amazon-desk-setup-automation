@@ -1,20 +1,321 @@
 {
   "version": 1,
   "products": {
-    "P005": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "REVIEW", "human_review": "APPROVED", "approved_for_production": true},
-    "P006": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "REVIEW", "human_review": "APPROVED", "approved_for_production": true},
-    "P007": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
-    "P008": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "REVIEW", "human_review": "APPROVED", "approved_for_production": true},
-    "P009": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
-    "P010": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
-    "P011": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
-    "P012": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
-    "P013": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
-    "P014": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
-    "P015": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
-    "P016": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
-    "P017": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
-    "P018": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true, "authorization_basis": "standing human authorization", "authorized_on": "2026-09-09"},
-    "P019": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true, "authorization_basis": "standing human authorization", "authorized_on": "2026-09-09"}
+    "P005": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true
+    },
+    "P006": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true
+    },
+    "P007": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "APPROVE",
+      "human_review": "APPROVED",
+      "approved_for_production": true
+    },
+    "P008": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true
+    },
+    "P009": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "APPROVE",
+      "human_review": "APPROVED",
+      "approved_for_production": true
+    },
+    "P010": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "APPROVE",
+      "human_review": "APPROVED",
+      "approved_for_production": true
+    },
+    "P011": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "APPROVE",
+      "human_review": "APPROVED",
+      "approved_for_production": true
+    },
+    "P012": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "APPROVE",
+      "human_review": "APPROVED",
+      "approved_for_production": true
+    },
+    "P013": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "APPROVE",
+      "human_review": "APPROVED",
+      "approved_for_production": true
+    },
+    "P014": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "APPROVE",
+      "human_review": "APPROVED",
+      "approved_for_production": true
+    },
+    "P015": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "APPROVE",
+      "human_review": "APPROVED",
+      "approved_for_production": true
+    },
+    "P016": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "APPROVE",
+      "human_review": "APPROVED",
+      "approved_for_production": true
+    },
+    "P017": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "APPROVE",
+      "human_review": "APPROVED",
+      "approved_for_production": true
+    },
+    "P018": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "APPROVE",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization",
+      "authorized_on": "2026-09-09"
+    },
+    "P019": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "APPROVE",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization",
+      "authorized_on": "2026-09-09"
+    },
+    "P020": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P021": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P022": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P023": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P024": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P025": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P026": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P029": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P030": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P031": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P032": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P033": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P034": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P036": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P038": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P039": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P040": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P042": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P043": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P044": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P045": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P049": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    },
+    "P050": {
+      "status": "APPROVED",
+      "draft_qc": "PASSED",
+      "selection": "REVIEW",
+      "human_review": "APPROVED",
+      "approved_for_production": true,
+      "authorization_basis": "standing human authorization for the queued candidate batch after identity/listing QC",
+      "authorized_on": "2026-09-09"
+    }
   }
 }
