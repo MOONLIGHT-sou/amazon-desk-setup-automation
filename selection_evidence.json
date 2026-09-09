@@ -953,6 +953,55 @@
         "confidence": "medium",
         "reason": "The product has concrete fit, footprint, folding and adjustment attributes that support a buyer-focused decision guide without unsupported performance promises."
       }
+    },
+    "P019": {
+      "identity": {
+        "confidence": "high",
+        "status": "verified",
+        "asin": "B08LHTJTBB",
+        "variant": "Silver",
+        "verified_on": "2026-09-09",
+        "source": "Current indexed Amazon-linked product records"
+      },
+      "demand": {
+        "score": 80,
+        "confidence": "medium",
+        "value": "99 historical daily units",
+        "verified_on": "2026-09-09",
+        "source": "PowerLaw Analytics Amazon India Notebook Computer Stands demand report",
+        "source_note": "Historical selection signal only; not a current-sales claim."
+      },
+      "review_volume": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "rating_context": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "review_themes": {
+        "score": null,
+        "confidence": "unknown",
+        "status": "not captured"
+      },
+      "niche_fit": {
+        "score": 95,
+        "confidence": "high",
+        "reason": "A foldable adjustable laptop/tabletop riser is directly relevant to the Minimal Desk Setup niche."
+      },
+      "fact_verifiability": {
+        "score": 90,
+        "confidence": "high",
+        "verified_on": "2026-09-09",
+        "source": "Exact-ASIN current indexed product records"
+      },
+      "content_potential": {
+        "score": 88,
+        "confidence": "medium",
+        "reason": "Six-angle adjustment, foldability, aluminum construction and compact tabletop use provide concrete desk-setup content angles without requiring performance guarantees."
+      }
     }
   }
 }

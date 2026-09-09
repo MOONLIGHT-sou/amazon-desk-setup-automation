@@ -486,6 +486,36 @@
         "Guaranteed stability or durability"
       ],
       "editorial_note": "The exact ASIN B09B4G243Y is consistent between the candidate queue and current marketplace tracking. Use the current Amazon.in listing as the source of truth for current price, availability, compatibility and specifications. Customer ratings/reviews and historical demand are evidence, not guarantees."
+    },
+    "P019": {
+      "product_name": "Dyazo 6 Angles Adjustable Aluminum Ergonomic Foldable Portable Tabletop Laptop/Desktop Riser Stand Holder (Silver)",
+      "variant": "Silver",
+      "asin": "B08LHTJTBB",
+      "category": "Minimal Desk Setup",
+      "amazon_link": "https://www.amazon.in/dp/B08LHTJTBB?tag=moonlight0adc-21",
+      "verified_on": "2026-09-09",
+      "verification_method": "Exact ASIN/product identity cross-checked against current indexed Amazon-linked product records.",
+      "safe_facts": [
+        "Dyazo 6 Angles Adjustable Aluminum Ergonomic Foldable Portable Tabletop Laptop/Desktop Riser Stand Holder",
+        "Silver variant",
+        "ASIN B08LHTJTBB",
+        "Six-angle adjustable design as stated in current product records",
+        "Foldable and portable design",
+        "Aluminum construction stated in product records",
+        "Tabletop laptop/desktop riser stand",
+        "Model DZ 888",
+        "24 x 4 x 1.8 cm and 240 g stated in current product records"
+      ],
+      "do_not_claim_as_current_fact": [
+        "Current Amazon.in price",
+        "Current Amazon.in availability",
+        "Guaranteed compatibility with every laptop",
+        "Guaranteed cooling or thermal reduction",
+        "Guaranteed stability or durability",
+        "Guaranteed ergonomic or health benefit",
+        "Guaranteed review sentiment"
+      ],
+      "editorial_note": "Use the live Amazon.in listing as the source of truth for current price, availability and listing details. Historical demand is selection evidence only, not a current-sales claim."
     }
   }
 }
