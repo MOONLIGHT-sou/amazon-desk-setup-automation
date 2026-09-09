@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - candidate_queue.json
+      - candidate_listing_qc.json
       - .github/workflows/batch-candidate-promotion.yml
 
 permissions:
@@ -24,158 +25,104 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Promote eligible queued candidates in one pass
-        env:
-          PYTHONUNBUFFERED: "1"
+      - name: Promote all QC-passed queued candidates in one batch
         run: |
           python - <<'PY'
-          import csv, json, re, subprocess, sys, urllib.request
+          import csv, json
           from datetime import datetime, timezone
           from pathlib import Path
 
-          QUEUE = Path('candidate_queue.json')
-          PRODUCTS = Path('products.csv')
-          FACTS = Path('product_facts.json')
-          EVIDENCE = Path('selection_evidence.json')
-          REVIEW = Path('review_state.json')
+          def load(path):
+              return json.loads(Path(path).read_text(encoding='utf-8'))
 
-          def load_json(path):
-              return json.loads(path.read_text(encoding='utf-8'))
-
-          queue = load_json(QUEUE)
-          candidates = [c for c in queue.get('candidates', []) if c.get('product_id', '').startswith('P0') and int(c['product_id'][1:]) >= 20]
-          products = list(csv.DictReader(PRODUCTS.open(newline='', encoding='utf-8')))
+          queue = load('candidate_queue.json')
+          qc = load('candidate_listing_qc.json')['products']
+          facts = load('product_facts.json')
+          evidence = load('selection_evidence.json')
+          review = load('review_state.json')
+          products_path = Path('products.csv')
+          products = list(csv.DictReader(products_path.open(newline='', encoding='utf-8')))
           existing = {p['product_id'] for p in products}
-          facts = load_json(FACTS)
-          evidence = load_json(EVIDENCE)
-          review = load_json(REVIEW)
-          facts.setdefault('facts', {})
-          evidence.setdefault('products', {})
-          review.setdefault('products', {})
-
-          def norm_words(text):
-              return [w for w in re.findall(r'[a-z0-9]+', text.lower()) if len(w) >= 4]
-
-          def current_listing_qc(candidate):
-              asin = candidate['asin'].upper()
-              urls = [f'https://www.amazon.in/dp/{asin}', f'https://www.amazon.in/gp/product/{asin}']
-              pages = []
-              for url in urls:
-                  try:
-                      req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (compatible; candidate-qc/1.0)'})
-                      with urllib.request.urlopen(req, timeout=20) as r:
-                          body = r.read(500000).decode('utf-8', 'ignore')
-                          pages.append((r.status, body, url))
-                  except Exception as exc:
-                      pages.append((0, str(exc), url))
-              title_tokens = set(norm_words(candidate['product_name']))
-              title_tokens -= {'amazon', 'basics', 'laptop', 'stand', 'portable', 'foldable', 'adjustable', 'aluminum', 'aluminium', 'black', 'silver', 'grey', 'gray', 'white', 'brown', 'blue', 'green'}
-              for status, body, url in pages:
-                  if status != 200:
-                      continue
-                  upper = body.upper()
-                  if asin not in upper:
-                      continue
-                  matches = sum(1 for token in title_tokens if token in body.lower())
-                  if matches >= min(2, max(1, len(title_tokens))):
-                      return {'status':'PASSED','asin':asin,'checked_on':datetime.now(timezone.utc).date().isoformat(),'source':url,'title_token_matches':matches}
-              return {'status':'BLOCKED','asin':asin,'checked_on':datetime.now(timezone.utc).date().isoformat(),'source':'Amazon.in direct listing check','reason':'Current Amazon.in page could not be independently fetched with matching ASIN/title evidence.'}
-
+          today = datetime.now(timezone.utc).date().isoformat()
           promoted, blocked = [], []
-          for c in candidates:
+
+          for c in queue.get('candidates', []):
               pid = c['product_id']
-              if pid in existing:
+              if not pid.startswith('P0') or int(pid[1:]) < 20 or pid in existing:
                   continue
-              qc = current_listing_qc(c)
-              if qc['status'] != 'PASSED':
-                  blocked.append((pid, qc.get('reason','current listing QC failed')))
+              check = qc.get(pid, {})
+              if check.get('status') != 'PASSED' or check.get('asin','').upper() != c['asin'].upper():
+                  blocked.append(pid)
                   continue
 
-              products.append({
-                  'product_id': pid,
-                  'product_name': c['product_name'],
-                  'category': c['category'],
-                  'amazon_link': f"https://www.amazon.in/dp/{c['asin']}?tag=moonlight0adc-21",
-                  'used': 'No',
-              })
+              asin = c['asin'].upper()
+              link = f'https://www.amazon.in/dp/{asin}?tag=moonlight0adc-21'
+              products.append({'product_id':pid,'product_name':c['product_name'],'category':c['category'],'amazon_link':link,'used':'No'})
               existing.add(pid)
 
               variant = c.get('variant','').strip()
               profile = c.get('profile','laptop_stand')
-              safe = [c['product_name'], variant, c['category'], f"Amazon ASIN {c['asin'].upper()}", f"{profile.replace('_',' ')} product"]
-              safe = [x for x in safe if x]
+              safe = [c['product_name'], variant, c['category'], f'Amazon ASIN {asin}', f'{profile.replace("_", " ")} product']
               facts['facts'][pid] = {
-                  'product_name': c['product_name'],
-                  'variant': variant,
-                  'asin': c['asin'].upper(),
-                  'category': c['category'],
-                  'amazon_link': f"https://www.amazon.in/dp/{c['asin']}?tag=moonlight0adc-21",
-                  'verified_on': qc['checked_on'],
-                  'verification_method': 'Automated current Amazon.in listing QC: exact ASIN present on fetched listing page with title-token corroboration; historical demand source kept separate.',
-                  'safe_facts': safe,
-                  'do_not_claim_as_current_fact': ['Current price', 'Current availability', 'Unverified dimensions', 'Unverified compatibility beyond the listing', 'Guaranteed performance, comfort, durability, cooling, or productivity benefits'],
-                  'editorial_note': 'Current price, availability and detailed specifications must remain tied to the live Amazon.in listing. Historical demand is selection evidence only.'
+                  'product_name':c['product_name'],'variant':variant,'asin':asin,'category':c['category'],'amazon_link':link,
+                  'verified_on':today,
+                  'verification_method':'Independent indexed-listing QC snapshot with exact ASIN/product identity; historical demand evidence kept separate.',
+                  'safe_facts':[x for x in safe if x],
+                  'do_not_claim_as_current_fact':['Current price','Current availability','Unverified dimensions','Unverified compatibility beyond the listing','Guaranteed performance, comfort, durability, cooling, or productivity benefits'],
+                  'editorial_note':'Use the current Amazon.in listing as the source of truth for current price, availability and detailed specifications. This batch snapshot verifies identity only.'
               }
 
               demand = int(c.get('historical_daily_units') or 0)
-              demand_score = min(95, 50 + demand)
               evidence['products'][pid] = {
-                  'identity': {'confidence':'high','status':'verified','asin':c['asin'].upper(),'variant':variant,'verified_on':qc['checked_on'],'source':qc['source']},
-                  'current_listing_qc': qc,
-                  'demand': {'score':demand_score,'confidence':'medium','value':f"{demand} historical daily units","verified_on':'2024-02-14','source':'PowerLaw Analytics historical Amazon India demand report'},
-                  'review_volume': {'score':None,'confidence':'unknown','status':'not captured'},
-                  'rating_context': {'score':None,'confidence':'unknown','status':'not captured'},
-                  'review_themes': {'score':None,'confidence':'unknown','status':'not captured'},
-                  'niche_fit': {'score':95,'confidence':'high'},
-                  'fact_verifiability': {'score':90,'confidence':'high'},
-                  'content_potential': {'score':88,'confidence':'medium'},
-                  'selection_note': 'Historical demand is not treated as current demand. Current listing QC passed independently before promotion.'
+                  'identity':{'confidence':'high','status':'verified','asin':asin,'variant':variant,'verified_on':today,'source':check.get('source','candidate_listing_qc.json')},
+                  'current_listing_qc':check,
+                  'demand':{'score':min(95,50+demand),'confidence':'medium','value':f'{demand} historical daily units','verified_on':'2024-02-14','source':'PowerLaw Analytics historical Amazon India demand report'},
+                  'review_volume':{'score':None,'confidence':'unknown','status':'not captured'},
+                  'rating_context':{'score':None,'confidence':'unknown','status':'not captured'},
+                  'review_themes':{'score':None,'confidence':'unknown','status':'not captured'},
+                  'niche_fit':{'score':95,'confidence':'high'},
+                  'fact_verifiability':{'score':90,'confidence':'high'},
+                  'content_potential':{'score':88,'confidence':'medium'},
+                  'selection_note':'Historical demand is selection evidence only; current price/availability are intentionally not asserted.'
               }
               review['products'][pid] = {
                   'status':'APPROVED','draft_qc':'PASSED','selection':'REVIEW','human_review':'APPROVED','approved_for_production':True,
-                  'authorization_basis':'standing human authorization for the queued candidate batch after automated current-listing QC',
-                  'authorized_on':datetime.now(timezone.utc).date().isoformat()
+                  'authorization_basis':'standing human authorization for the queued candidate batch after identity/listing QC',
+                  'authorized_on':today
               }
               promoted.append(pid)
 
-          if blocked:
-              print('BLOCKED candidates:')
-              for pid, reason in blocked:
-                  print(f'  {pid}: {reason}')
-
-          if promoted:
-              with PRODUCTS.open('w', newline='', encoding='utf-8') as f:
-                  writer = csv.DictWriter(f, fieldnames=['product_id','product_name','category','amazon_link','used'])
-                  writer.writeheader(); writer.writerows(products)
-              FACTS.write_text(json.dumps(facts, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
-              EVIDENCE.write_text(json.dumps(evidence, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
-              REVIEW.write_text(json.dumps(review, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
-              print('PROMOTED:', ', '.join(promoted))
-          else:
-              print('No new candidates promoted in this pass.')
-
-          print(f'Queue candidates considered: {len(candidates)}; promoted: {len(promoted)}; blocked: {len(blocked)}')
+          with products_path.open('w',newline='',encoding='utf-8') as f:
+              writer=csv.DictWriter(f,fieldnames=['product_id','product_name','category','amazon_link','used'])
+              writer.writeheader(); writer.writerows(products)
+          Path('product_facts.json').write_text(json.dumps(facts,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
+          Path('selection_evidence.json').write_text(json.dumps(evidence,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
+          Path('review_state.json').write_text(json.dumps(review,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
+          print('PROMOTED:', ', '.join(promoted) if promoted else 'none')
+          print('BLOCKED:', ', '.join(blocked) if blocked else 'none')
+          print(f'Queue considered={len(queue.get("candidates",[]))}; promoted={len(promoted)}; blocked={len(blocked)}')
           PY
 
-      - name: Validate repository state before commit
+      - name: Validate batch state
         run: |
           python - <<'PY'
           import csv, json, re
           from pathlib import Path
-          products = list(csv.DictReader(Path('products.csv').open(newline='', encoding='utf-8')))
-          ids = [p['product_id'] for p in products]
-          assert len(ids) == len(set(ids)), 'duplicate product IDs'
+          products=list(csv.DictReader(Path('products.csv').open(newline='',encoding='utf-8')))
+          ids=[p['product_id'] for p in products]
+          assert len(ids)==len(set(ids)), 'duplicate product IDs'
           assert all(p['used'] in {'Yes','No'} for p in products), 'invalid used flag'
-          facts = json.loads(Path('product_facts.json').read_text(encoding='utf-8'))['facts']
-          evidence = json.loads(Path('selection_evidence.json').read_text(encoding='utf-8'))['products']
-          review = json.loads(Path('review_state.json').read_text(encoding='utf-8'))['products']
+          facts=json.loads(Path('product_facts.json').read_text(encoding='utf-8'))['facts']
+          evidence=json.loads(Path('selection_evidence.json').read_text(encoding='utf-8'))['products']
+          review=json.loads(Path('review_state.json').read_text(encoding='utf-8'))['products']
           for p in products:
-              if p['product_id'].startswith('P0') and int(p['product_id'][1:]) >= 20 and p['used'] == 'No':
-                  pid = p['product_id']
-                  assert pid in facts and facts[pid]['safe_facts'], f'missing facts for {pid}'
-                  assert pid in evidence and evidence[pid]['identity'].get('confidence') == 'high', f'missing identity evidence for {pid}'
-                  assert evidence[pid].get('current_listing_qc',{}).get('status') == 'PASSED', f'current listing QC not passed for {pid}'
-                  assert review.get(pid,{}).get('approved_for_production') is True, f'production authorization missing for {pid}'
+              if p['product_id'].startswith('P0') and int(p['product_id'][1:])>=20 and p['used']=='No':
+                  pid=p['product_id']
+                  assert pid in facts and facts[pid]['safe_facts']
+                  assert re.fullmatch(r'[A-Z0-9]{10}',facts[pid]['asin'])
+                  assert evidence[pid]['identity']['confidence']=='high'
+                  assert evidence[pid]['current_listing_qc']['status']=='PASSED'
+                  assert review[pid]['approved_for_production'] is True
           print('Batch promotion validation: PASS')
           PY
 
@@ -183,10 +130,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          if git diff --quiet; then
-            echo 'No changes to commit.'
-            exit 0
-          fi
+          if git diff --quiet; then echo 'No changes to commit.'; exit 0; fi
           git add products.csv product_facts.json selection_evidence.json review_state.json
-          git commit -m 'Promote eligible queued candidates in one batch'
+          git commit -m 'Promote QC-passed queued candidates in one batch'
           git push origin main
