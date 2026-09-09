@@ -21,6 +21,9 @@ concurrency:
   group: amazon-desk-setup-auto-production-dispatch
   cancel-in-progress: false
 
+env:
+  LISTING_QC_MAX_AGE_DAYS: "14"
+
 jobs:
   dispatch:
     name: Dispatch next approved product
@@ -38,7 +41,10 @@ jobs:
           import csv
           import json
           import os
+          import re
+          from datetime import date
 
+          max_age = int(os.environ["LISTING_QC_MAX_AGE_DAYS"])
           with open("products.csv", newline="", encoding="utf-8") as file:
               rows = list(csv.DictReader(file))
 
@@ -66,7 +72,30 @@ jobs:
                   output.write("dispatch=false\n")
               raise SystemExit(0)
 
-          print(f"Approved first-unused target: {target_id} — {target['product_name']}")
+          try:
+              evidence = json.load(open("selection_evidence.json", encoding="utf-8"))
+              listing = evidence["products"][target_id]["current_listing_qc"]
+          except (OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
+              print(f"Safe stop: fresh listing QC unavailable for {target_id}: {exc}")
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+                  output.write("dispatch=false\n")
+              raise SystemExit(0)
+
+          expected = re.search(r"/dp/([A-Z0-9]{10})", target["amazon_link"], re.I)
+          freshness = re.search(r"crawled\s+(\d{4}-\d{2}-\d{2})", listing.get("freshness", ""), re.I)
+          if listing.get("status") != "PASSED" or not expected or listing.get("asin", "").upper() != expected.group(1).upper() or not freshness:
+              print(f"Safe stop: listing QC does not match the target ASIN for {target_id}.")
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+                  output.write("dispatch=false\n")
+              raise SystemExit(0)
+          age = (date.today() - date.fromisoformat(freshness.group(1))).days
+          if age < 0 or age > max_age:
+              print(f"Safe stop: listing QC for {target_id} is {age} days old; maximum is {max_age}.")
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+                  output.write("dispatch=false\n")
+              raise SystemExit(0)
+
+          print(f"Approved fresh first-unused target: {target_id} — {target['product_name']} (QC age={age} days)")
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
               output.write("dispatch=true\n")
               output.write(f"target={target_id}\n")
