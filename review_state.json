@@ -14,6 +14,7 @@
     "P015": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
     "P016": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
     "P017": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true},
-    "P018": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true, "authorization_basis": "standing human authorization", "authorized_on": "2026-09-09"}
+    "P018": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true, "authorization_basis": "standing human authorization", "authorized_on": "2026-09-09"},
+    "P019": {"status": "APPROVED", "draft_qc": "PASSED", "selection": "APPROVE", "human_review": "APPROVED", "approved_for_production": true, "authorization_basis": "standing human authorization", "authorized_on": "2026-09-09"}
   }
 }
