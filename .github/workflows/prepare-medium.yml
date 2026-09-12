@@ -1,0 +1,51 @@
+name: Prepare Medium Manual Post
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_product_id:
+        description: "Approved product package to prepare for manual Medium posting"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify production package and authorization
+        env:
+          TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
+        run: |
+          python - <<'PY'
+          import csv, json, os
+          pid = os.environ["TARGET_PRODUCT_ID"].strip()
+          rows = list(csv.DictReader(open("products.csv", newline="", encoding="utf-8")))
+          row = next((r for r in rows if r["product_id"] == pid), None)
+          if row is None or row["used"].strip().lower() != "yes":
+              raise SystemExit("MEDIUM PREP BLOCKED: target is not a consumed production product.")
+          review = json.load(open("review_state.json", encoding="utf-8"))["products"].get(pid, {})
+          if review.get("status") != "APPROVED" or review.get("approved_for_production") is not True or review.get("draft_qc") != "PASSED":
+              raise SystemExit("MEDIUM PREP BLOCKED: production authorization/QC is not approved.")
+          if not os.path.isfile(f"content/{pid}/package.txt"):
+              raise SystemExit("MEDIUM PREP BLOCKED: production package is missing.")
+          print(f"Medium preparation preflight PASS: {pid}")
+          PY
+
+      - name: Prepare manual Medium post
+        run: python prepare_medium_manual.py "${{ inputs.target_product_id }}"
+
+      - name: Upload Medium-ready package
+        uses: actions/upload-artifact@v4
+        with:
+          name: medium-ready-${{ inputs.target_product_id }}
+          path: medium-ready/${{ inputs.target_product_id }}/
+          if-no-files-found: error
