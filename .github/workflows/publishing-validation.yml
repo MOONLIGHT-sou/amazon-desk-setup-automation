@@ -1,4 +1,4 @@
-name: Publishing - Credential Validation
+name: Pinterest - Credential and Image Validation
 
 on:
   workflow_dispatch:
@@ -22,10 +22,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Validate credentials and image source (read-only)
+      - name: Validate Pinterest credentials and image source (read-only)
         env:
-          MEDIUM_INTEGRATION_TOKEN: ${{ secrets.MEDIUM_INTEGRATION_TOKEN }}
-          MEDIUM_USER_ID: ${{ secrets.MEDIUM_USER_ID }}
           PINTEREST_ACCESS_TOKEN: ${{ secrets.PINTEREST_ACCESS_TOKEN }}
           PINTEREST_BOARD_ID: ${{ secrets.PINTEREST_BOARD_ID }}
           PINTEREST_IMAGE_URL: ${{ secrets.PINTEREST_IMAGE_URL }}
