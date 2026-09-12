@@ -1,8 +1,8 @@
-"""Credential-safe Medium/Pinterest publishing adapter.
+"""Credential-safe Pinterest publishing adapter.
 
-The adapter is intentionally fail-closed: no network publishing occurs unless the
-required environment variables are present and PUBLISH_ENABLED=true. Secrets are
-never written to repository files or logs.
+Medium is intentionally excluded from automatic API publishing. Medium's current
+API terms prohibit automatically generated content, and Medium no longer issues
+new integration tokens. Medium output is prepared for manual posting instead.
 """
 from __future__ import annotations
 
@@ -10,11 +10,10 @@ import json
 import os
 import re
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
-
-MEDIUM_API = "https://api.medium.com/v1"
 PINTEREST_API = "https://api.pinterest.com/v5"
 
 
@@ -25,12 +24,12 @@ def _required(name: str) -> str:
     return value
 
 
-def _request(url: str, token: str, payload: dict) -> dict:
-    body = json.dumps(payload).encode("utf-8")
+def _request_json(url: str, token: str, method: str = "GET", payload: dict | None = None) -> dict:
+    data = json.dumps(payload).encode("utf-8") if payload is not None else None
     req = urllib.request.Request(
         url,
-        data=body,
-        method="POST",
+        data=data,
+        method=method,
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
@@ -54,59 +53,80 @@ def parse_package(path: Path) -> dict:
     product_id = re.search(r"^Product ID:\s*(\S+)", text, re.M)
     product_name = re.search(r"^Product Name:\s*(.+)$", text, re.M)
     amazon_link = re.search(r"^Amazon Link:\s*(\S+)", text, re.M)
-    medium = re.search(r"==============================\nMEDIUM\n==============================\n(.*?)(?=\n==============================\nPINTEREST MAIN PIN)", text, re.S)
-    if not all((product_id, product_name, amazon_link, medium)):
+    pinterest = re.search(
+        r"==============================\nPINTEREST MAIN PIN\n==============================\n(.*?)(?=\n==============================\nPINTEREST PRODUCT PIN)",
+        text,
+        re.S,
+    )
+    if not all((product_id, product_name, amazon_link, pinterest)):
         raise RuntimeError("PUBLISH BLOCKED: content package is missing required sections")
-    section = medium.group(1)
+    section = pinterest.group(1)
     title = re.search(r"^Title:\s*(.+)$", section, re.M)
-    if not title:
-        raise RuntimeError("PUBLISH BLOCKED: Medium title is missing")
-    # Preserve the generated copy; remove only the package metadata wrapper.
-    body = re.sub(r"^Title:\s*.+$", "", section, count=1, flags=re.M).strip()
+    description = re.search(r"^Description:\s*(.+)$", section, re.M)
+    if not title or not description:
+        raise RuntimeError("PUBLISH BLOCKED: Pinterest title/description is missing")
     return {
         "product_id": product_id.group(1),
         "product_name": product_name.group(1).strip(),
         "amazon_link": amazon_link.group(1).strip(),
-        "medium_title": title.group(1).strip(),
-        "medium_body": body,
+        "pinterest_title": title.group(1).strip(),
+        "pinterest_description": description.group(1).strip(),
     }
 
 
-def publish_medium(data: dict) -> dict:
-    token = _required("MEDIUM_INTEGRATION_TOKEN")
-    user_id = _required("MEDIUM_USER_ID")
-    payload = {
-        "title": data["medium_title"],
-        "contentFormat": "markdown",
-        "content": data["medium_body"],
-        "publishStatus": os.getenv("MEDIUM_PUBLISH_STATUS", "draft"),
-        "tags": ["desk setup", "productivity", "amazon finds"],
-    }
-    return _request(f"{MEDIUM_API}/users/{user_id}/posts", token, payload)
+def _image_url_is_valid(url: str) -> None:
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme != "https" or not parsed.netloc:
+        raise RuntimeError("PINTEREST_IMAGE_URL must be a public HTTPS URL")
+
+
+def _already_pinned(board_id: str, token: str, amazon_link: str) -> bool:
+    """Fail closed on an existing matching link to prevent duplicate Pins."""
+    url = f"{PINTEREST_API}/boards/{urllib.parse.quote(board_id, safe='')}/pins?page_size=100"
+    checked = 0
+    while url and checked < 500:
+        data = _request_json(url, token)
+        for item in data.get("items", []):
+            if item.get("link") == amazon_link:
+                return True
+            checked += 1
+            if checked >= 500:
+                break
+        bookmark = data.get("bookmark")
+        if not bookmark or checked >= 500:
+            break
+        url = f"{PINTEREST_API}/boards/{urllib.parse.quote(board_id, safe='')}/pins?page_size=100&bookmark={urllib.parse.quote(bookmark, safe='')}"
+    return False
 
 
 def publish_pinterest(data: dict) -> dict:
     token = _required("PINTEREST_ACCESS_TOKEN")
     board_id = _required("PINTEREST_BOARD_ID")
     image_url = _required("PINTEREST_IMAGE_URL")
+    _image_url_is_valid(image_url)
+    if _already_pinned(board_id, token, data["amazon_link"]):
+        raise RuntimeError(
+            f"PUBLISH BLOCKED: a Pinterest Pin with the same Amazon link already exists on board {board_id}"
+        )
     payload = {
         "board_id": board_id,
-        "title": data["medium_title"][:100],
-        "description": (
-            f"{data['product_name']} — desk setup decision guide. "
-            "Check the current Amazon listing before buying. "
-            "As an Amazon Associate I earn from qualifying purchases."
-        )[:500],
+        "title": data["pinterest_title"][:100],
+        "description": data["pinterest_description"][:500],
         "link": data["amazon_link"],
         "media_source": {"source_type": "image_url", "url": image_url},
     }
-    return _request(f"{PINTEREST_API}/pins", token, payload)
+    return _request_json(f"{PINTEREST_API}/pins", token, method="POST", payload=payload)
 
 
 def main() -> None:
     if os.getenv("PUBLISH_ENABLED", "false").lower() != "true":
         print("Publishing disabled: set PUBLISH_ENABLED=true only in an authorized environment.")
         return
+    if os.getenv("PUBLISH_MEDIUM", "false").lower() == "true":
+        raise RuntimeError(
+            "PUBLISH BLOCKED: Medium automatic API publishing is disabled. "
+            "Use the generated Medium manual-post package instead."
+        )
     pid = os.getenv("TARGET_PRODUCT_ID", "").strip()
     if not pid:
         raise RuntimeError("PUBLISH BLOCKED: TARGET_PRODUCT_ID is required")
@@ -114,12 +134,11 @@ def main() -> None:
     if not package.is_file():
         raise RuntimeError(f"PUBLISH BLOCKED: missing package {package}")
     data = parse_package(package)
-    results = {}
-    if os.getenv("PUBLISH_MEDIUM", "true").lower() == "true":
-        results["medium"] = publish_medium(data)
-    if os.getenv("PUBLISH_PINTEREST", "true").lower() == "true":
-        results["pinterest"] = publish_pinterest(data)
-    print(json.dumps({"product_id": pid, "published": list(results)}, indent=2))
+    if os.getenv("PUBLISH_PINTEREST", "true").lower() != "true":
+        print(json.dumps({"product_id": pid, "published": []}, indent=2))
+        return
+    result = publish_pinterest(data)
+    print(json.dumps({"product_id": pid, "published": ["pinterest"], "pinterest_id": result.get("id")}, indent=2))
 
 
 if __name__ == "__main__":
