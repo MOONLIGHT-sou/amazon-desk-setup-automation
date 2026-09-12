@@ -1,65 +1,63 @@
 # Medium + Pinterest publishing
 
-The publishing adapter is downstream of production. It cannot consume an unapproved/unproduced product.
+Publishing is downstream of production. It cannot consume an unapproved/unproduced product.
 
-## Required GitHub Actions environment
+## Current platform-safe design
 
-Create exactly **one** repository environment named `publishing` and add these **environment secrets**. Never commit them to the repository.
+### Medium
 
-- `MEDIUM_INTEGRATION_TOKEN` — existing Medium integration token.
-- `MEDIUM_USER_ID` — Medium user id associated with the integration token.
+Medium is **manual-post only** in this project.
+
+Medium's current Help Center says it no longer issues new integration tokens or allows new integrations, while existing tokens continue to work. Medium's API terms also prohibit using the API to post automatically generated content. Therefore this repository no longer attempts Medium API publishing.
+
+The repository prepares a **Medium-ready Markdown package** from the already approved production content. Run **Prepare Medium Manual Post**, download its artifact, add the approved real images, human-edit/fact-check, and paste it into Medium manually.
+
+### Pinterest
+
+Pinterest remains the automated publishing target. Pinterest's API supports creating image Pins and requires an authorized access token with board/pin permissions; image Pins can use a public `image_url` media source.
+
+## GitHub environment
+
+Create exactly **one** repository environment named `publishing`.
+
+Required Pinterest environment secrets:
+
 - `PINTEREST_ACCESS_TOKEN` — Pinterest API access token with permission to create Pins.
-- `PINTEREST_BOARD_ID` — destination Pinterest board id.
-- `PINTEREST_IMAGE_URL` — HTTPS image URL for the approved product Pin. The image must be publicly fetchable by Pinterest.
+- `PINTEREST_BOARD_ID` — destination board ID.
+- `PINTEREST_IMAGE_URL` — public HTTPS URL of the approved real Pin image.
 
-The workflow uses the `publishing` environment so these secrets are not exposed to normal production jobs.
+The old Medium secrets may remain in the environment, but they are no longer consumed by automated publishing.
 
-## Authentication / connection
+## Pinterest validation
 
-Account authorization must happen outside this repository. The user creates or retrieves the service credentials in those services, then stores the values as GitHub environment secrets. The repository never stores raw credentials.
+Run **Pinterest - Credential and Image Validation** manually.
 
-Pinterest currently requires an authorized API token with appropriate board/pin scopes for creating Pins. The repository's read-only validation workflow checks token access and board access before any Pin is created.
+It checks, without creating anything:
 
-**Medium caveat:** Medium's current Help Center says it is not issuing new integration tokens or allowing new integrations, while existing integration tokens continue to work. Therefore this adapter is viable only if the supplied token is an existing working Medium integration token. The validation workflow performs a read-only `GET /v1/me` check and does not publish anything.
+1. Pinterest token access.
+2. Destination board access.
+3. Public HTTPS image URL and image content type.
 
-## Safe defaults
+## Pinterest publishing
 
-- Medium is published as a **draft** by default (`MEDIUM_PUBLISH_STATUS=draft`).
-- The publishing workflow is manual (`workflow_dispatch`) and is separate from the production workflow.
-- Production gates are not weakened or bypassed.
-- A product must already have `used=Yes`, an approved review state, and an existing production package.
-- Missing credentials or missing image URL fail closed.
-- Credential validation is read-only and never creates a post or Pin.
+Run **Publishing - Pinterest** manually for a product that has already passed the production gates.
 
-## Connection validation
+The workflow independently checks:
 
-Run **Publishing - Credential Validation** manually from GitHub Actions after adding the secrets.
+- `used=Yes`
+- review `APPROVED`
+- `approved_for_production=true`
+- `draft_qc=PASSED`
+- production package exists
 
-The validation checks:
+The adapter also checks the target board for an existing Pin with the same Amazon link and blocks duplicate publication before POSTing a new Pin.
 
-1. Medium token authentication (`GET /v1/me`).
-2. Pinterest token authentication (`GET /v5/pins`).
-3. Pinterest destination board access (`GET /v5/boards/{board_id}`).
-4. `PINTEREST_IMAGE_URL` is HTTPS and publicly fetchable as an image.
+## Images
 
-No publishing mutation occurs during this workflow.
+The automation does **not** invent replacement product images or rely on ephemeral GitHub Actions artifacts. `PINTEREST_IMAGE_URL` must point to the actual approved image hosted at a stable public HTTPS location.
 
-## Publishing test
-
-Only after credential validation passes:
-
-1. Run **Publishing - Medium + Pinterest** manually for an already consumed/approved product.
-2. First test with Pinterest disabled and Medium enabled; Medium should create a draft if the existing token remains valid.
-3. Then test Pinterest with the verified image URL.
-4. Verify the resulting Medium draft and Pinterest Pin manually.
-5. Only after both are independently verified should automatic publishing be considered.
-
-## Image source
-
-The production package contains generated copy and an Amazon link but does not itself contain a stable hosted Pin image URL. `PINTEREST_IMAGE_URL` therefore must point to a real public image. Do not invent an image URL, use a private/local URL, or rely on an ephemeral GitHub Actions artifact URL.
-
-A future image adapter should generate/use the approved product artwork and publish it to stable public hosting before the Pinterest step. The image adapter must remain separate from the production safety path.
+For Medium, use the same approved real image as the first/featured image. Medium's guidance recommends putting the first image at the beginning of the story and setting it as the featured image.
 
 ## Credential safety
 
-Do not put tokens in `products.csv`, `review_state.json`, package files, commits, workflow inputs, logs, or issue comments. Do not echo secret environment variables. Rotate credentials immediately if they are ever exposed.
+Never put tokens in `products.csv`, `review_state.json`, package files, commits, workflow inputs, logs, or issue comments. Never echo secret environment variables. Rotate a credential immediately if it is exposed.
