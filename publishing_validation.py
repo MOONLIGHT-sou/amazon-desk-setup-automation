@@ -1,7 +1,7 @@
-"""Read-only validation for Medium/Pinterest publishing credentials and image source.
+"""Read-only Pinterest credential and image-source validation.
 
-All checks are independent so one failed provider does not hide failures in the
-other provider. Secrets are never printed.
+Medium is intentionally not validated for API publishing because current Medium
+policy/API availability does not support the intended automated workflow.
 """
 from __future__ import annotations
 
@@ -42,11 +42,7 @@ def check_image(url: str) -> None:
     parsed = urllib.parse.urlparse(url)
     if parsed.scheme != "https" or not parsed.netloc:
         raise RuntimeError("PINTEREST_IMAGE_URL must be a public HTTPS URL")
-    req = urllib.request.Request(
-        url,
-        method="HEAD",
-        headers={"User-Agent": "amazon-desk-setup-automation/1.0"},
-    )
+    req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "amazon-desk-setup-automation/1.0"})
     try:
         with urllib.request.urlopen(req, timeout=20) as response:
             if response.status < 200 or response.status >= 400:
@@ -77,40 +73,19 @@ def check_image(url: str) -> None:
 
 
 def main() -> None:
-    failures: list[str] = []
+    token = required("PINTEREST_ACCESS_TOKEN")
+    board_id = required("PINTEREST_BOARD_ID")
+    image_url = required("PINTEREST_IMAGE_URL")
 
-    # Medium: existing tokens only. Medium's current help page says it no longer
-    # issues new integration tokens, while existing tokens continue to work.
-    try:
-        medium_token = required("MEDIUM_INTEGRATION_TOKEN")
-        medium_user_id = required("MEDIUM_USER_ID")
-        status = request_json("https://api.medium.com/v1/me", medium_token)
-        print(f"Medium credential check: PASS (HTTP {status})")
-        print("Medium user ID: PRESENT")
-        if not medium_user_id:
-            raise RuntimeError("MEDIUM_USER_ID is missing")
-    except RuntimeError as exc:
-        print(f"Medium credential check: FAIL ({exc})")
-        failures.append(f"Medium: {exc}")
-
-    try:
-        pinterest_token = required("PINTEREST_ACCESS_TOKEN")
-        board_id = required("PINTEREST_BOARD_ID")
-        image_url = required("PINTEREST_IMAGE_URL")
-        status = request_json("https://api.pinterest.com/v5/pins?page_size=1", pinterest_token)
-        print(f"Pinterest token check: PASS (HTTP {status})")
-        status = request_json(f"https://api.pinterest.com/v5/boards/{board_id}", pinterest_token)
-        print(f"Pinterest board access check: PASS (HTTP {status})")
-        check_image(image_url)
-        print("Pinterest image URL check: PASS")
-    except RuntimeError as exc:
-        print(f"Pinterest/image check: FAIL ({exc})")
-        failures.append(f"Pinterest/image: {exc}")
-
-    if failures:
-        raise SystemExit("\n".join(failures))
-
-    print("Publishing credentials and image source passed read-only validation.")
+    status = request_json("https://api.pinterest.com/v5/pins?page_size=1", token)
+    print(f"Pinterest token check: PASS (HTTP {status})")
+    status = request_json(
+        f"https://api.pinterest.com/v5/boards/{urllib.parse.quote(board_id, safe='')}", token
+    )
+    print(f"Pinterest board access check: PASS (HTTP {status})")
+    check_image(image_url)
+    print("Pinterest image URL check: PASS")
+    print("Pinterest credentials and image source passed read-only validation.")
 
 
 if __name__ == "__main__":
