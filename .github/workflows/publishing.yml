@@ -1,28 +1,18 @@
-name: Publishing - Medium + Pinterest
+name: Publishing - Pinterest
 
 on:
   workflow_dispatch:
     inputs:
       target_product_id:
-        description: "Approved product package to publish"
+        description: "Approved product package to publish to Pinterest"
         required: true
         type: string
-      medium:
-        description: "Publish to Medium"
-        required: true
-        default: true
-        type: boolean
-      pinterest:
-        description: "Publish to Pinterest"
-        required: true
-        default: true
-        type: boolean
 
 permissions:
   contents: read
 
 concurrency:
-  group: publishing-${{ inputs.target_product_id }}
+  group: pinterest-publishing-${{ inputs.target_product_id }}
   cancel-in-progress: false
 
 jobs:
@@ -35,10 +25,12 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 1
+
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
+
       - name: Verify production package and authorization
         shell: python
         env:
@@ -56,16 +48,14 @@ jobs:
           package = f"content/{pid}/package.txt"
           if not os.path.isfile(package):
               raise SystemExit("PUBLISH BLOCKED: production package is missing.")
-          print(f"Publishing preflight PASS: {pid}")
-      - name: Publish approved package
+          print(f"Pinterest publishing preflight PASS: {pid}")
+
+      - name: Publish approved package to Pinterest
         env:
           PUBLISH_ENABLED: "true"
-          PUBLISH_MEDIUM: ${{ inputs.medium }}
-          PUBLISH_PINTEREST: ${{ inputs.pinterest }}
+          PUBLISH_MEDIUM: "false"
+          PUBLISH_PINTEREST: "true"
           TARGET_PRODUCT_ID: ${{ inputs.target_product_id }}
-          MEDIUM_INTEGRATION_TOKEN: ${{ secrets.MEDIUM_INTEGRATION_TOKEN }}
-          MEDIUM_USER_ID: ${{ secrets.MEDIUM_USER_ID }}
-          MEDIUM_PUBLISH_STATUS: draft
           PINTEREST_ACCESS_TOKEN: ${{ secrets.PINTEREST_ACCESS_TOKEN }}
           PINTEREST_BOARD_ID: ${{ secrets.PINTEREST_BOARD_ID }}
           PINTEREST_IMAGE_URL: ${{ secrets.PINTEREST_IMAGE_URL }}
